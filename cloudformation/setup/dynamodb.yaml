@@ -1,0 +1,26 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Template to create all the Dynamo DB tables required in the MLO application
+Parameters:
+  Env:
+    Type: String
+    Description: 'environment (uppercase only), ex: QAS, PRD'
+Resources:
+  RequestsNotifTableRes:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+      - AttributeName: uuid
+        AttributeType: S
+      KeySchema:
+      - AttributeName: uuid
+        KeyType: HASH
+      TableName:
+        Fn::Sub: DY-MLO-NotifProcessingLog-${Env}
+      ProvisionedThroughput:
+        ReadCapacityUnits: '5'
+        WriteCapacityUnits: '5'
+Outputs:
+  RequestsNotifTableRes:
+    Value:
+      Ref: RequestsNotifTableRes

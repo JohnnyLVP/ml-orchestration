@@ -3,6 +3,12 @@ import uuid
 from constants.common_constants import CommonConstants
 from utils.sns import SNSManager
 
+'''
+    Environment Variables
+        REGION_NAME: us-east-1
+        TOPIC_ARN: arn:aws:sns:us-east-1:639556434474:SNS-MLO-Topic-DEV
+'''
+
 def lambda_handler(event, context):
     
     print(json.dumps(event))
@@ -11,14 +17,13 @@ def lambda_handler(event, context):
         message = event['Records'][0]['Sns']['Message']
         message_item = json.loads(message)
         response_process = process_mlo_notification(message_item,topic_arn)
-        
+        return response_process
     except Exception as e: 
         print("Exception in sns notification: {}",format(e))
 
-
 def get_hash_uuid():
     uniq_id = str(uuid.uuid4())
-    flow_id = "{}-{}".format("ClosedCampaignCountry",uniq_id)
+    flow_id = "{}".format(uniq_id)
     return flow_id
 
 def process_mlo_notification(message,topic_arn):

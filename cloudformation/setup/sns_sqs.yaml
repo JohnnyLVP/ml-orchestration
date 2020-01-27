@@ -1,0 +1,76 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Template to create sns and sqs.
+Parameters:
+  Env:
+    Type: String
+    Description: 'environment (uppercase only), ex: QAS, PRD'
+  AppEnv:
+    Type: String
+    Description: 'application environment (lowercase only), ex: qas, prd'
+Resources:
+  TopicRes:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName:
+        Fn::Sub: SNS-MLO-Topic-${Env}
+      DisplayName:
+        Fn::Sub: SNS-MLO-Topic-${Env}
+  ProcessQueueRes:
+    Type: AWS::SQS::Queue
+    Properties:
+      DelaySeconds: '0'
+      QueueName:
+        Fn::Sub: SQS-MLO-ProcessQueue-${Env}
+      MaximumMessageSize: '262144'
+      MessageRetentionPeriod: '7200'
+      ReceiveMessageWaitTimeSeconds: '0'
+      VisibilityTimeout: '120'
+  ProcessQueueResSubs:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn:
+        Ref: TopicRes
+      Endpoint:
+        Fn::GetAtt:
+        - ProcessQueueRes
+        - Arn
+      Protocol: sqs
+      FilterPolicy:
+        message_type:
+        - process
+  ProcessQueueResPolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+      - Ref: ProcessQueueRes
+      PolicyDocument:
+        Version: '2012-10-17'
+        Id: ProcessQueuePolicyId
+        Statement:
+        - Sid: Sid1
+          Effect: Allow
+          Principal: "*"
+          Action: SQS:SendMessage
+          Resource:
+            Fn::GetAtt:
+            - ProcessQueueRes
+            - Arn
+          Condition:
+            ArnEquals:
+              aws:SourceArn:
+                Ref: TopicRes
+Outputs:
+  TopicRes:
+    Value:
+      Ref: TopicRes
+  ProcessQueueResArn:
+    Value:
+      Fn::Join:
+      - " "
+      - - 'ARN:'
+        - Fn::GetAtt:
+          - ProcessQueueRes
+          - Arn
+        - 'URL:'
+        - Ref: ProcessQueueRes

@@ -47,3 +47,16 @@ class S3Manager:
             status = False
 
         return status
+
+    def get_file_object(self, bucket, s3_file_path):
+
+        try:
+            result = self.s3_client.get_object(
+                Bucket = bucket,
+                Key = s3_file_path
+            )
+            file = result["Body"].read().decode()    
+        except botocore.exceptions.ClientError as e:
+            print("Exception ocurred while getting file from s3, {}".format(str(e)))
+        
+        return file

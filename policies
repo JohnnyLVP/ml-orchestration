@@ -1,0 +1,184 @@
+--sns
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "sns:Publish",
+                "sns:GetTopicAttributes"
+            ],
+            "Resource": "arn:aws:sns:us-east-1:639556434474:SNS-MLO-Topic-DEV"
+        },
+        {
+            "Sid": "VisualEditor1",
+            "Effect": "Allow",
+            "Action": "sns:ListTopics",
+            "Resource": "*"
+        }
+    ]
+}
+
+--sqs
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "sqs:DeleteMessage",
+                "sqs:ReceiveMessage",
+                "sqs:GetQueueAttributes"
+            ],
+            "Resource": "arn:aws:sqs:us-east-1:639556434474:SQS-MLO-ProcessQueue-DEV"
+        }
+    ]
+}
+--general 1
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "logs:CreateLogGroup",
+            "Resource": "arn:aws:logs:us-east-1:639556434474:*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": [
+                "arn:aws:logs:us-east-1:639556434474:log-group:/aws/lambda/Lambda-MLO-processnotification-DEV:*"
+            ]
+        }
+    ]
+}
+
+{
+    "Statement": [
+        {
+            "Action": [
+                "lambda:InvokeFunction",
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "logs:DescribeLogStreams",
+                "logs:getLogEvents",
+                "logs:filterLogEvents",
+                "logs:putMetricFilter",
+                "logs:putRetentionPolicy",
+                "logs:putSubscriptionFilter",
+                "logs:createExportTask",
+                "cloudwatch:getMetricData",
+                "elasticmapreduce:*",
+                "events:DescribeRule",
+                "events:EnableRule",
+                "events:ListRules",
+                "events:PutEvents",
+                "events:PutPermission",
+                "events:PutRule"
+            ],
+            "Resource": "*",
+            "Effect": "Allow"
+        },
+        {
+            "Action": "elasticmapreduce:*",
+            "Resource": "*",
+            "Effect": "Allow"
+        },
+        {
+            "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:ListTables",
+                "dynamodb:DeleteItem",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:DescribeStream",
+                "dynamodb:UpdateItem",
+                "dynamodb:DescribeTimeToLive",
+                "dynamodb:ListStreams",
+                "dynamodb:DescribeReservedCapacityOfferings",
+                "dynamodb:DescribeTable",
+                "dynamodb:GetShardIterator",
+                "dynamodb:DescribeGlobalTable",
+                "dynamodb:DescribeReservedCapacity",
+                "dynamodb:GetItem",
+                "dynamodb:DescribeContinuousBackups",
+                "dynamodb:DescribeBackup",
+                "dynamodb:GetRecords"
+            ],
+            "Resource": [
+                "arn:aws:dynamodb:us-east-1:639556434474:table/DY-ROD-RequestsProcessingLog-DEV",
+                "arn:aws:dynamodb:us-east-1:639556434474:table/DY-ROD-RequestsInfo-DEV",
+                "arn:aws:dynamodb:us-east-1:639556434474:table/DY-ROD-TrainedModelsInfo-DEV",
+                "arn:aws:dynamodb:us-east-1:639556434474:table/DY_bigdata_cm_integration_dev"
+            ],
+            "Effect": "Allow"
+        },
+        {
+            "Action": [
+                "sqs:ListQueues",
+                "sqs:ReceiveMessage",
+                "sqs:CreateQueue",
+                "sqs:ReceiveMessage",
+                "sqs:SendMessage",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes"
+            ],
+            "Resource": [
+                "arn:aws:sqs:us-east-1:639556434474:SQS-ROD-ProcessQueue-DEV-*",
+                "arn:aws:sqs:us-east-1:639556434474:SQS-ROD-UpdatesQueue-DEV-*"
+            ],
+            "Effect": "Allow"
+        },
+        {
+            "Action": [
+                "s3:GetObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::belc-bigdata-functional-dlk-dev",
+                "arn:aws:s3:::belc-bigdata-functional-dlk-dev/*",
+                "arn:aws:s3:::belc-bigdata-domain-dlk-dev",
+                "arn:aws:s3:::belc-bigdata-domain-dlk-dev/*"
+            ],
+            "Effect": "Allow"
+        },
+        {
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::belc-rod-app-wrkspace-dev",
+                "arn:aws:s3:::belc-rod-app-wrkspace-dev/*",
+                "arn:aws:s3:::belc-bigdata-apps-shared-dev",
+                "arn:aws:s3:::belc-bigdata-apps-shared-dev/*"
+            ],
+            "Effect": "Allow"
+        },
+        {
+            "Action": "states:*",
+            "Resource": "arn:aws:states:us-east-1:639556434474:stateMachine:SF-MLO-DEV",
+            "Effect": "Allow"
+        },
+        {
+            "Action": [
+                "sns:Publish",
+                "sns:GetTopicAttributes",
+                "sns:List*",
+                "sns:CreateTopic",
+                "sns:DeleteTopic"
+            ],
+            "Resource": "arn:aws:sns:us-east-1:639556434474:SNS-ROD-Topic-DEV-*",
+            "Effect": "Allow"
+        }
+    ]
+}

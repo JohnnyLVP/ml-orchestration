@@ -1,0 +1,15 @@
+{   
+    "Version":"0",
+    "Process":{
+        "DistribuitedProcess": 
+            {
+              "Recommender":"http://recommender.somosbelcorp.com/api/train-all",
+              "DigitalForecast":"http://digitalforecast.somosbelcorp.com/api/train-all"  
+            },
+        "SecuentialProcess":
+            {
+                "DeoModel":"http://deomodel.somosbelcorp.com/api/train-all",
+                "CreadorOfertas":"http://creadorofertas.somosbelcorp.com/api/training"
+            }
+    }
+}

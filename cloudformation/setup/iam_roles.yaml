@@ -1,0 +1,120 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Template to create roles
+Parameters:
+  Env:
+    Type: String
+    Description: 'environment (uppercase only), ex: DEV, QAS, PRD'
+  AppEnv:
+    Type: String
+    Description: 'application environment (lowercase only), ex: dev, qas, prd'
+  Org:
+    Type: String
+    Default: belc
+    Description: 'organization (lowercase only), ex: belc (belcorp)'
+Resources:
+  LambdaExecutionRoleRes:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: IAM-MLO-LambdaExec-${Env}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+            - states.amazonaws.com
+          Action: sts:AssumeRole
+      Policies:
+      - PolicyName:
+          Fn::Sub: MLO-LambdaExec-Policy-${Env}
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - lambda:InvokeFunction
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - logs:DescribeLogStreams
+            - logs:getLogEvents
+            - logs:filterLogEvents
+            - logs:putMetricFilter
+            - logs:putRetentionPolicy
+            - logs:putSubscriptionFilter
+            - logs:createExportTask
+            - cloudwatch:getMetricData
+            - elasticmapreduce:*
+            - events:DescribeRule
+            - events:EnableRule
+            - events:ListRules
+            - events:PutEvents
+            - events:PutPermission
+            - events:PutRule
+            Resource: "*"
+          - Effect: Allow
+            Action: elasticmapreduce:*
+            Resource: "*"
+          - Effect: Allow
+            Action:
+            - dynamodb:BatchGetItem
+            - dynamodb:BatchWriteItem
+            - dynamodb:PutItem
+            - dynamodb:ListTables
+            - dynamodb:DeleteItem
+            - dynamodb:Scan
+            - dynamodb:Query
+            - dynamodb:DescribeStream
+            - dynamodb:UpdateItem
+            - dynamodb:DescribeTimeToLive
+            - dynamodb:ListStreams
+            - dynamodb:DescribeReservedCapacityOfferings
+            - dynamodb:DescribeTable
+            - dynamodb:GetShardIterator
+            - dynamodb:DescribeGlobalTable
+            - dynamodb:DescribeReservedCapacity
+            - dynamodb:GetItem
+            - dynamodb:DescribeContinuousBackups
+            - dynamodb:DescribeBackup
+            - dynamodb:GetRecords
+            Resource:
+            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/DY-MLO-NotifProcessingLog-${Env}
+          - Effect: Allow
+            Action:
+            - sqs:ListQueues
+            - sqs:ReceiveMessage
+            - sqs:CreateQueue
+            - sqs:ReceiveMessage
+            - sqs:SendMessage
+            - sqs:DeleteMessage
+            - sqs:GetQueueAttributes
+            Resource:
+            - Fn::Sub: arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:SQS-MLO-ProcessQueue-${Env}-*
+          - Effect: Allow
+            Action:
+            - s3:GetObject
+            - s3:ListBucket
+            Resource:
+            - Fn::Sub: arn:aws:s3:::${Org}-bigdata-models-dlk-${AppEnv}
+            - Fn::Sub: arn:aws:s3:::${Org}-bigdata-models-dlk-${AppEnv}/*
+          - Effect: Allow
+            Action: states:*
+            Resource:
+              Fn::Sub: arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:SF-MLO-${Env}-*
+          - Effect: Allow
+            Action:
+            - sns:Publish
+            - sns:GetTopicAttributes
+            - sns:List*
+            - sns:CreateTopic
+            - sns:DeleteTopic
+            Resource:
+              Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:SNS-MLO-Topic-${Env}-*
+Outputs:
+  LambdaExecutionRoleRes:
+    Value:
+      Fn::GetAtt:
+      - LambdaExecutionRoleRes
+      - Arn
