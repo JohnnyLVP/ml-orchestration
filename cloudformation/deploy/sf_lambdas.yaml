@@ -1,0 +1,172 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS Step Functions for Recommender
+Parameters:
+  Env:
+    Type: String
+    Description: 'environment (uppercase only), ex: DEV, QAS, PRD'
+  AppEnv:
+    Type: String
+    Description: 'application environment (lowercase only), ex: dev, qas, prd'
+  Org:
+    Type: String
+    Description: 'organization (lowercase only), ex: belc (belcorp)'
+  TemplateUploadsBucket:
+    Type: String
+    Description: S3 bucket for referenced templates
+  VPCSubnetIDsA:
+    Type: String
+    Description: The list of SubnetIds in your Virtual Private Cloud (VPC)
+  VPCSubnetIDsB:
+    Type: String
+    Description: The list of SubnetIds in your Virtual Private Cloud (VPC)
+  VPCSecurityGroupIDs:
+    Type: String
+    Description: The list of SubnetIds in your Virtual Private Cloud (VPC)
+Resources:
+  StateMachineRes:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName:
+        Fn::Sub: SF-MLO-${Env}-${DeployTag}
+      RoleArn:
+        Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/IAM-MLO-LambdaExec-${Env}
+      Fn::Transform:
+        Name: AWS::Include
+        Parameters:
+          Location:
+            Fn::Sub: s3://${TemplateUploadsBucket}/template-uploads/state_machine_def.json
+  ProcessNotification:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: Lambda-MLO-ProcessNotification-${Env}
+      Environment:
+        Variables:
+          APP_ENV:
+            Ref: AppEnv
+          ORG:
+            Ref: Org
+          REGION_NAME:
+            Fn::Sub: "${AWS::Region}"
+          TOPIC_ARN:
+            Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:SNS-MLO-Topic-${Env}
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Sub: Lambda-MLO-ProcessNotification-${Env}
+      - Key: Grupo
+        Value: MLOrchestration
+      - Key: Direccion
+        Value: TRAD
+      - Key: Entorno
+        Value:
+          Ref: Env
+      - Key: CTLAdmin
+        Value: 'NO'
+      - Key: Tipo
+        Value: Proyecto
+      Handler: process_sns_notification.lambda_handler
+      Role:
+        Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/${LambdaExecRole}
+      Runtime: python3.6
+      Timeout: 10
+      Code:
+        S3Bucket:
+          Ref: TemplateUploadsBucket
+        S3Key:
+          Fn::Sub: template-uploads/${DeployTag}/process_sns_notification.zip
+  TriggerProcess:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: Lambda-MLO-triggeralgorithms-${Env}
+      Environment:
+        Variables:
+          APP_ENV:
+            Ref: AppEnv
+          ORG:
+            Ref: Org
+          REGION_NAME:
+            Fn::Sub: "${AWS::Region}"
+          STATE_MACHINE_ARN:
+            Fn::GetAtt:
+              -StateMachineRes
+              -Arn
+          TOPIC_ARN:
+            Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${TopicName}
+          BUCKET_NAME:
+            Ref: TemplateUploadsBucket
+          PATH_NAME: ml-orchestration/algorithm_list.json
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Sub: Lambda-MLO-triggeralgorithms-${Env}
+      - Key: Grupo
+        Value: MLOrchestration
+      - Key: Direccion
+        Value: TRAD
+      - Key: Entorno
+        Value:
+          Ref: Env
+      - Key: CTLAdmin
+        Value: 'NO'
+      - Key: Tipo
+        Value: Proyecto
+      Handler: trigger_wf_process.lambda_handler
+      Role:
+        Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/${LambdaExecRole}
+      Runtime: python3.6
+      Timeout: 10
+      Code:
+        S3Bucket:
+          Ref: TemplateUploadsBucket
+        S3Key:
+          Fn::Sub: template-uploads/trigger_wf_process.zip
+  ProcessStatusEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      BatchSize: 1
+      Enabled: true
+      EventSourceArn:
+        Fn::Sub: arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:SQS-MLO-ProcessQueue-${Env}
+      FunctionName:
+        Fn::GetAtt:
+        - processwfupdates
+        - Arn
+Outputs:
+  StateMachineRes:
+    Value:
+      Fn::GetAtt:
+      - StateMachineRes
+      - Name
+  triggerprocesswf:
+    Value:
+      Fn::GetAtt:
+      - triggerprocesswf
+      - Arn
+  processwfupdates:
+    Value:
+      Fn::GetAtt:
+      - processwfupdates
+      - Arn
+  PostProcessingCleanup:
+    Value:
+      Fn::GetAtt:
+      - PostProcessingCleanup
+      - Arn
+  PerformPostProcessSteps:
+    Value:
+      Fn::GetAtt:
+      - PerformPostProcessSteps
+      - Arn
+  CheckProcessStatus:
+    Value:
+      Fn::GetAtt:
+      - CheckProcessStatus
+      - Arn
+  SubmitToProcess:
+    Value:
+      Fn::GetAtt:
+      - SubmitToProcess
+      - Arn
