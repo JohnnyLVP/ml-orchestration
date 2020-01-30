@@ -1,6 +1,7 @@
 import json
 import os
 from utils.step_functions import StepFunctionsManager
+from utils.orchestrator_utils import OrchestratorManager
 from utils.s3 import S3Manager
 
 '''
@@ -8,6 +9,7 @@ Environment Variables:
     PATH_NAME: ml-orchestration/algorithm_list.json
     STATE_MACHINE_ARN: arn:aws:states:us-east-1:639556434474:stateMachine:SF-MLO-DEV
     BUCKET_NAME: belc-bigdata-models-dlk-dev
+    DB_TABLE_NAME: DY-MLO-FinishedTraining-DEV
 '''
 
 def lambda_handler(event, context):
@@ -44,9 +46,10 @@ def get_training_uuid(message):
         s3_bucket = os.environ['BUCKET_NAME']
         file_path = os.environ['PATH_NAME']
         s3_manager = S3Manager()
-        json_list = s3_manager.get_file_object(s3_bucket,file_path)
-        print(json_list)
+        alg_list = s3_manager.get_file_object(s3_bucket,file_path)
+
     except Exception as e:
         print("Exception ocurred: {}".format(e))
     
+    return json.loads(alg_list)
     
