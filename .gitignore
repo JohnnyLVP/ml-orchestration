@@ -130,3 +130,6 @@ dmypy.json
 
 #ignore ides folder
 .idea/
+
+#ignoring zip files
+*.zip
