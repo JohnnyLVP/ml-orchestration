@@ -6,11 +6,13 @@
                 {
                     "algoritmo": "Recommender",
                     "endpoint":"http://recommender.somosbelcorp.com/api/train-all",
+                    "avg_exec_time":"",
                     "payload":""
                 },
                 {
                     "algoritmo": "DigitalForecast",
                     "endpoint":"http://digitalforecast.somosbelcorp.com/api/train-all",
+                    "avg_exec_time":"",
                     "payload":""
                 }
         ],
@@ -19,16 +21,19 @@
                 {
                     "algoritmo":"DeoModel",
                     "endpoint":"http://deomodel.somosbelcorp.com/api/train-all",
+                    "avg_exec_time":"",
                     "payload":""
                 },
                 {
                     "algoritmo":"CreadorOfertas",
                     "endpoint":"http://creadorofertas.somosbelcorp.com/api/training",
+                    "avg_exec_time":"",
                     "payload":""
                 },
                 {
                     "algoritmo":"PaseDePedido",
                     "endpoint":"http://pasedepedido.somosbelcorp.com/api/training",
+                    "avg_exec_time":"",
                     "payload":""
                 }
             ]

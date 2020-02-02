@@ -1,18 +1,64 @@
 DefinitionString:
  Fn::Sub: |
  {
-    "Comment": "A Hello World example of the Amazon States Language using Pass states",
-    "StartAt": "Hello",
-    "States": {
-      "Hello": {
-        "Type": "Pass",
-        "Result": "Hello",
-        "Next": "World"
-      },
-      "World": {
-        "Type": "Pass",
-        "Result": "World",
-        "End": true
-      }
+  "Comment": "Step to Submit request to Algorithm API",
+  "StartAt": "SubmitRequest",
+  "States": {
+    "SubmitRequest": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:639556434474:function:Lambda-MLO-SubmitRequests-DEV",
+      "Next": "CheckProcessRequestStatus"
+    },
+    "CheckProcessRequestStatus": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable":"$.request_status",
+          "StringEquals":"REQUESTED",
+          "Next":"WaitForProcess"
+        },
+        {
+          "Variable":"$.request_status",
+          "StringEquals":"FAILED",
+          "Next":"PostProcessingStep"
+        }
+      ],
+      "Default":"PostProcessingStep"
+    },
+    "WaitForProcess":{
+      "Type":"Wait",
+      "SecondsPath":"$.wait_time",
+      "Next":"CheckProcessStatus"
+    },
+    "CheckProcessStatus":{
+      "Type":"Task",
+      "Resource":"arn:aws:lambda:us-east-1:639556434474:function:Lambda-MLO-CheckProcessStatus-DEV",
+      "Next":"ChoiceOnProcessStatus"
+    },
+    "ChoiceOnProcessStatus":{
+      "Type":"Choice",
+      "Choices":[
+        {
+          "Variable":"$.process_status",
+          "StringEquals":"COMPLETED",
+          "Next": "PostProcessingStep"
+        },
+        {
+          "Variable":"$.process_status",
+          "StringEquals":"FAILED",
+          "Next": "PostProcessingStep" 
+        },
+        {
+          "Variable":"$.process_status",
+          "StringEquals":"RUNNING",
+          "Next": "WaitForProcess"
+        }
+      ]
+    },
+    "PostProcessingStep":{
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:639556434474:function:Lambda-MLO-PostProcessingStep-DEV",
+      "End": true
     }
   }
+}
