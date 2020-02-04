@@ -27,7 +27,7 @@ DefinitionString:
     },
     "WaitForProcess":{
       "Type":"Wait",
-      "SecondsPath":"$.wait_time",
+      "SecondsPath":"$.info.avg_wait_time",
       "Next":"CheckProcessStatus"
     },
     "CheckProcessStatus":{

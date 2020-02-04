@@ -1,10 +1,14 @@
-import json,os
+import json
+import os
 from botocore.vendored import requests
 from utils.dynamo_db import DBManager
 from utils.orchestrator_utils import OrchestratorManager
 from constants.process_stages_enum import PipelineStages
 from constants.db_status_enum import DBStatus
 from constants.db_tables_enum import DBTables
+
+ok_status = 200
+
 
 def lambda_handler(event, context):
     '''
@@ -14,42 +18,39 @@ def lambda_handler(event, context):
     :return:
     '''
     print(event)
+    aws_region = os.environ['REGION_NAME']
+    update_topic = os.environ['SNS_TOPIC_ARN']
+    mlo_manager = OrchestratorManager()
     try:
         # process campaign update message
-        process_update_dbtable(event)
-        process_update_message(event)
+        response = get_response_train_request(event)
+        if response.status_code == ok_status:
+            mlo_manager.get_process_status_updates(
+                region_name=aws_region,
+                update_topic_arn=update_topic,
+                uniq_id=event['uuid'],
+                proc_stage=PipelineStages.request,
+                proc_status=DBStatus.submitted
+            )
+
+            event['request_status'] = 'REQUESTED'
+            event['process_status'] = 'SUBMITTED'
+
+        return event
 
     except Exception as e:
         print("Exception in process_campaign_update_notif lambda: {}".format(e))
-        raise e
+        failure_reason = str(e)[:150]
+        mlo_manager.get_process_status_updates(
+            region_name=aws_region,
+            update_topic_arn=update_topic,
+            uniq_id=event['uuid'],
+            proc_stage=PipelineStages.request,
+            proc_status=DBStatus.failed,
+            failure_reason=failure_reason
+        )
 
-def process_update_dbtable(event):
-    '''
-
-    :param event:
-    :return:
-    '''
-    db_manager = DBManager()
-    mlo_manager = OrchestratorManager()
-    item = {}
-
-    try:
-        item['uuid'] = event['uuid']
-        item['timestamp'] = mlo_manager.get_current_timestamp()
-        item['stage'] = PipelineStages.request
-        item['status'] = DBStatus.pending
-        item['reason'] = None
-
-        db_item = mlo_manager.format_db_item(item)
-        print("Following item is been writed: {}".format(db_item))
-
-        db_tablename = "{}-{}".format(DBTables.logs,event['env'])
-
-        db_manager.put_item(db_tablename,db_item)
-    except Exception as e:
-        print("Exception ocurred : {}".format(str(e)))
-
-def process_update_message(event):
+def get_response_train_request(event):
     '''
 
     :param event:
@@ -61,8 +62,8 @@ def process_update_message(event):
         payload['codpais'] = message_item['country']
         payload['aniocampana'] = message_item['campaign']
         response = requests.post(
-                        message_item['info']['endpoint'],
-                        data = json.dumps(payload))
+            message_item['info']['endpoint'],
+            data=json.dumps(payload))
         print("response: {}".format(response))
         print("response content: {}".format(response.content))
 
