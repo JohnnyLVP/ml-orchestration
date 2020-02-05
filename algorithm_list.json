@@ -6,7 +6,7 @@
                 {
                     "algoritmo": "Recommender",
                     "endpoint":"http://recommender.somosbelcorp.com/api/train-all",
-                    "avg_wait_time":"",
+                    "avg_wait_time": 2600,
                     "payload":""
                 },
                 {

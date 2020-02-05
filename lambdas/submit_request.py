@@ -1,13 +1,11 @@
 import json
 import os
 from botocore.vendored import requests
-from utils.dynamo_db import DBManager
+from constants.regular_constants import *
 from utils.orchestrator_utils import OrchestratorManager
 from constants.process_stages_enum import PipelineStages
 from constants.db_status_enum import DBStatus
-from constants.db_tables_enum import DBTables
-
-ok_status = 200
+from constants.common_constants import CommonConstants
 
 
 def lambda_handler(event, context):
@@ -24,19 +22,17 @@ def lambda_handler(event, context):
     try:
         # process campaign update message
         response = get_response_train_request(event)
-        if response.status_code == ok_status:
+        if response.status_code == post_request_status:
             mlo_manager.get_process_status_updates(
                 region_name=aws_region,
                 update_topic_arn=update_topic,
-                uniq_id=event['uuid'],
+                uniq_id=event[uuid],
                 proc_stage=PipelineStages.request,
                 proc_status=DBStatus.submitted
             )
 
-            event['request_status'] = 'REQUESTED'
-            event['process_status'] = 'SUBMITTED'
-
-        return event
+            event[request_status] = CommonConstants.request_succeded
+            event[process_status] = DBStatus.submitted
 
     except Exception as e:
         print("Exception in process_campaign_update_notif lambda: {}".format(e))
@@ -44,11 +40,15 @@ def lambda_handler(event, context):
         mlo_manager.get_process_status_updates(
             region_name=aws_region,
             update_topic_arn=update_topic,
-            uniq_id=event['uuid'],
+            uniq_id=event[uuid],
             proc_stage=PipelineStages.request,
             proc_status=DBStatus.failed,
             failure_reason=failure_reason
         )
+        event[request_status] = CommonConstants.request_failed
+        event[process_status] = DBStatus.failed
+
+    return event
 
 def get_response_train_request(event):
     '''
