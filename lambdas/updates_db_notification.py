@@ -3,23 +3,74 @@ import os
 from botocore.vendored import requests
 from constants.regular_constants import *
 from utils.orchestrator_utils import OrchestratorManager
+from utils.dynamo_db import DBManager
 from constants.process_stages_enum import PipelineStages
 from constants.db_status_enum import DBStatus
+from constants.db_tables_enum import DBTables
 from constants.common_constants import CommonConstants
 
+'''
+    ENV: DEV
+'''
 
 
 def lambda_handler(event, context):
-    #print(json.dumps(event))
+    print(json.dumps(event))
 
     try:
         message = json.loads(event['Records'][0]['body'])
-
-        if message.get('info'):
-            print("Write in Info DynamoTable...") #Lambda Trigger process siempre tiene que manda este update
+        dy_tablename,dy_status = update_dynamo_table(message)
         
-        else:
-            print("Write in Processing DynamoTable...")
-            
+        print('Table {db_table} has been updated: {db_status}'.format(
+            db_table = dy_tablename,
+            db_status = dy_status
+        ))
+
     except Exception as e:
         print('Exception has ocurred: {}'.format(str(e)))
+
+    return (dy_tablename, dy_status)
+
+
+def update_dynamo_table(message):
+
+    mlo_manager = OrchestratorManager()
+    db_manager = DBManager()
+    item = {}
+    status = True
+    try:
+
+        if message.get('info'):
+
+            dy_tablename = '{TableName}-{Env}'.format(
+                TableName=DBTables.info,
+                Env=os.environ['ENV'])
+
+            item['uuid'] = message['uuid']
+            item['timestamp'] = message['timestamp']
+            item['info'] = message['info']
+
+        else:
+
+            dy_tablename = '{TableName}-{Env}'.format(
+                TableName=DBTables.logs,
+                Env=os.environ['ENV'])
+
+            item['uuid'] = message['uuid']
+            item['timestamp'] = message['timestamp']
+            item['stage'] = message['stage']
+            item['status'] = message['status']
+            item['failure_reason'] = message['failure_reason']
+        
+        db_items = mlo_manager.format_db_item(message_item=item)
+        
+        status = db_manager.put_item(
+            table_name=dy_tablename,
+            item=db_items)
+
+    except Exception as e:
+        print("Exception has ocurred: {}".format(str(e)))
+        status = False
+
+    return dy_tablename, status
+
