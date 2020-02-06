@@ -21,6 +21,5 @@ def lambda_handler(event, context):
         else:
             print("Write in Processing DynamoTable...")
             
-            
     except Exception as e:
         print('Exception has ocurred: {}'.format(str(e)))
