@@ -48,7 +48,7 @@ def update_dynamo_table(message):
 
             item['uuid'] = message['uuid']
             item['timestamp'] = message['timestamp']
-            item['info'] = message['info']
+            item['info'] = str(message['info'])
 
         else:
 
