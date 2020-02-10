@@ -49,7 +49,7 @@ run_steps(){
     mv $setup_file $tmp_setup/
   done
 
-  aws s3 sync $tmp_dir_parent s3://$wrk_space_bucket/template-uploads/
+  aws s3 sync $tmp_dir_parent s3://$wrk_space_bucket/ml-orchestration/
   rm -rf $tmp_dir_parent
 }
 
@@ -60,13 +60,13 @@ print_usage_and_exit(){
   printf "\t1. App Envrionment (lowercase only, ex: dev, qas, prd)\n"
 
   # optional parameters
-  printf "\t3. Region (optional, lowercase only, default is us-east-1)\n"
-  printf "\t4. Organisation Prefix (optional, lowercase only, default is belc)\n"
+  printf "\t2. Region (optional, lowercase only, default is us-east-1)\n"
+  printf "\t3. Organisation Prefix (optional, lowercase only, default is belc)\n"
 
   exit
 }
 
-if [ $# -lt 2 ]
+if [ $# -lt 1 ]
 then
   print_usage_and_exit
 fi
@@ -77,15 +77,15 @@ org_prefix="belc"
 
 app_env=$1
 
-if [ $# = 3 ]; then
-  echo "Region is set to $3"
+if [ $# = 2 ]; then
+  echo "Region is set to $2"
   region=$3
 fi
 
-if [ $# = 4 ]; then
-  echo "Region is set to $3"
+if [ $# = 3 ]; then
+  echo "Region is set to $2"
   region=$3
-  echo "Org prefix is set to $4"
+  echo "Org prefix is set to $3"
   org_prefix=$4
 fi
 
