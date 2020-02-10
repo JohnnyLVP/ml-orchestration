@@ -30,7 +30,7 @@ def lambda_handler(event, context):
         message_item['country'] = json.loads(message)['codPais']
         message_item['campaign'] = json.loads(message)['anioCampania']
 
-        response = notif_status_notification(message, topic_arn, process_type)
+        response = notif_status_notification(message_item, topic_arn, process_type)
         print('Sent notification status: {}'.format(response))
 
     except Exception as e:
