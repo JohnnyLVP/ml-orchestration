@@ -53,3 +53,9 @@ class OrchestratorManager:
             print("Exception has ocurred: {}".format(str(e)))
     
         return response
+
+    @classmethod
+    def get_time_duration(self, start_time):
+        curr_time = self.get_current_timestamp()
+        duration = int(curr_time) - int(start_time)
+        return duration # in millisec

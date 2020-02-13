@@ -5,8 +5,8 @@
             [
                 {
                     "algoritmo": "Recommender",
-                    "endpoint":"http://recommender.somosbelcorp.com/api/train-all",
-                    "avg_wait_time": 2600,
+                    "endpoint":"https://reqres.in/api/users",
+                    "avg_wait_time": 300,
                     "payload":""
                 },
                 {

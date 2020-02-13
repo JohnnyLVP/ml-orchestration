@@ -39,17 +39,17 @@ DefinitionString:
       "Type":"Choice",
       "Choices":[
         {
-          "Variable":"$.process_status",
+          "Variable":"$.process_info.status",
           "StringEquals":"COMPLETED",
           "Next": "PostProcessingStep"
         },
         {
-          "Variable":"$.process_status",
+          "Variable":"$.process_info.status",
           "StringEquals":"FAILED",
           "Next": "PostProcessingStep" 
         },
         {
-          "Variable":"$.process_status",
+          "Variable":"$.process_info.status",
           "StringEquals":"RUNNING",
           "Next": "WaitForProcess"
         }
