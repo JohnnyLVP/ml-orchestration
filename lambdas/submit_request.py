@@ -15,10 +15,12 @@ def lambda_handler(event, context):
     :param context:
     :return:
     '''
-    print(event)
+    print(json.dumps(event))
     aws_region = os.environ['REGION_NAME']
     update_topic = os.environ['SNS_TOPIC_ARN']
     mlo_manager = OrchestratorManager()
+    event['process_info'] = {}
+
     try:
         # process campaign update message
         response = get_response_train_request(event)

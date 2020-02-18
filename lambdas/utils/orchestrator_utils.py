@@ -1,6 +1,8 @@
+import json, os
 import uuid
 import time
 from utils.sns import SNSManager
+from utils.s3 import S3Manager
 from constants.common_constants import CommonConstants
 
 
@@ -59,3 +61,16 @@ class OrchestratorManager:
         curr_time = self.get_current_timestamp()
         duration = int(curr_time) - int(start_time)
         return duration # in millisec
+    
+    @classmethod
+    def get_json_list(s3_bucket, file_path):
+        try:
+            #s3_bucket = os.environ['BUCKET_NAME']
+            #file_path = os.environ['PATH_NAME']
+            s3_manager = S3Manager()
+            alg_list = s3_manager.get_file_object(s3_bucket,file_path)
+            
+        except Exception as e:
+            print("Exception ocurred: {}".format(e))
+        
+        return json.loads(alg_list)
