@@ -63,7 +63,7 @@ class OrchestratorManager:
         return duration # in millisec
     
     @classmethod
-    def get_json_list(s3_bucket, file_path):
+    def get_json_list(self, s3_bucket, file_path):
         try:
             #s3_bucket = os.environ['BUCKET_NAME']
             #file_path = os.environ['PATH_NAME']
