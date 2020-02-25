@@ -15,15 +15,17 @@ def lambda_handler(event, context):
     :param context:
     :return:
     '''
-    print(json.dumps(event))
+    print(event)
     aws_region = os.environ['REGION_NAME']
     update_topic = os.environ['SNS_TOPIC_ARN']
     mlo_manager = OrchestratorManager()
-    event['process_info'] = {}
-
     try:
         # process campaign update message
         response = get_response_train_request(event)
+        
+        print(response)
+        print(response.content)
+
         if response.status_code == post_request_status:
             mlo_manager.get_process_status_updates(
                 region_name=aws_region,
@@ -34,10 +36,12 @@ def lambda_handler(event, context):
             )
 
             event[request_status] = CommonConstants.request_succeded
-            event['process_info']['status'] = DBStatus.submitted
+            event[process_status] = DBStatus.submitted
+        
+        else: raise Exception
 
     except Exception as e:
-        print("Exception in process_campaign_update_notif lambda: {}".format(e))
+        print("Exception in process_campaign_update_notif lambda: {}".format(str(e)))
         failure_reason = str(e)[:150]
         mlo_manager.get_process_status_updates(
             region_name=aws_region,
@@ -48,7 +52,7 @@ def lambda_handler(event, context):
             failure_reason=failure_reason
         )
         event[request_status] = CommonConstants.request_failed
-        event['process_info']['status'] = DBStatus.failed
+        event[process_status] = DBStatus.failed
 
     return event
 
@@ -58,18 +62,21 @@ def get_response_train_request(event):
     :param event:
     :return:
     '''
+    message_item = event
+    payload = {}
+    
     try:
-        message_item = json.loads(event)
-        payload = message_item['item']['payload']
-        payload['codpais'] = message_item['country']
-        payload['aniocampana'] = message_item['campaign']
+        payload['country'] = message_item['country']
+        payload['campaign'] = message_item['campaign']
+        payload.update(message_item['info']['payload'])
+        
+        print(payload)
+        
         response = requests.post(
             message_item['info']['endpoint'],
-            data=json.dumps(payload))
-        print("response: {}".format(response))
-        print("response content: {}".format(response.content))
+            data= json.dumps(payload))
 
     except Exception as e:
-        print("{}".format(e))
+        print("Request issues: {}".format(e))
 
     return response

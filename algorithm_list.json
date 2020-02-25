@@ -5,9 +5,9 @@
             [
                 {
                     "algoritmo": "Recommender",
-                    "endpoint":"https://reqres.in/api/users",
+                    "endpoint":"https://leo3hmu4fc.execute-api.us-east-1.amazonaws.com/dev/api/train-all",
                     "avg_wait_time": 300,
-                    "payload":""
+                    "payload": {"epoch":"1557151604"}
                 },
                 {
                     "algoritmo": "DigitalForecast",
