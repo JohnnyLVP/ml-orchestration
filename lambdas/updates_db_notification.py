@@ -1,13 +1,9 @@
 import json
 import os
-from botocore.vendored import requests
 from constants.regular_constants import *
 from utils.orchestrator_utils import OrchestratorManager
 from utils.dynamo_db import DBManager
-from constants.process_stages_enum import PipelineStages
-from constants.db_status_enum import DBStatus
 from constants.db_tables_enum import DBTables
-from constants.common_constants import CommonConstants
 
 '''
     ENV: DEV

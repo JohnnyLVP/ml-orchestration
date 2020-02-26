@@ -1,4 +1,4 @@
-import json, os
+import json
 import uuid
 import time
 from utils.sns import SNSManager
@@ -68,8 +68,6 @@ class OrchestratorManager:
     @classmethod
     def get_json_list(self, s3_bucket, file_path):
         try:
-            #s3_bucket = os.environ['BUCKET_NAME']
-            #file_path = os.environ['PATH_NAME']
             s3_manager = S3Manager()
             alg_list = s3_manager.get_file_object(s3_bucket,file_path)
             

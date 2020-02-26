@@ -2,7 +2,6 @@ import json
 import os
 from utils.step_function import StepFunctionsManager
 from utils.orchestrator_utils import OrchestratorManager
-from utils.s3 import S3Manager
 from utils.sns import SNSManager
 from utils.orchestrator_utils import OrchestratorManager
 from constants.common_constants import CommonConstants
@@ -24,7 +23,7 @@ def lambda_handler(event, context):
     print(json.dumps(event))
 
     try:
-                
+
         response = trigger_step_function(event)
 
     except Exception as e:
