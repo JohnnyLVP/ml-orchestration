@@ -68,6 +68,7 @@ def get_response_train_request(event):
     try:
         payload['country'] = message_item['country']
         payload['campaign'] = message_item['campaign']
+        payload['mlo_uuid'] = message_item['uuid']
         payload.update(message_item['info']['payload'])
         
         print(payload)
