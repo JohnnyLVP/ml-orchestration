@@ -26,6 +26,7 @@ def lambda_handler(event, context):
         print(response)
         print(response.content)
 
+        event['process_info']={}
         if response.status_code == post_request_status:
             mlo_manager.get_process_status_updates(
                 region_name=aws_region,
@@ -37,7 +38,7 @@ def lambda_handler(event, context):
             )
 
             event[request_status] = CommonConstants.request_succeded
-            event[process_status] = DBStatus.submitted
+            event['process_info']['status'] = DBStatus.submitted
 
     except Exception as e:
         print("Exception in process_campaign_update_notif lambda: {}".format(str(e)))
@@ -51,7 +52,7 @@ def lambda_handler(event, context):
             failure_reason=failure_reason
         )
         event[request_status] = CommonConstants.request_failed
-        event[process_status] = DBStatus.failed
+        event['process_info']['status'] = DBStatus.failed
 
     return event
 
