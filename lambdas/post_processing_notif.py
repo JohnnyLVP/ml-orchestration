@@ -1,8 +1,9 @@
-import json
+import json,os
 from utils.orchestrator_utils import OrchestratorManager
 from utils.sns import SNSManager
 from constants.db_status_enum import DBStatus
 from constants.process_stages_enum import PipelineStages
+
 
 def lambda_handler(event, context):
 
@@ -61,7 +62,7 @@ def post_updates_message(event, sns_manager):
         update_message['failure_reason'] = event['process_info']['failure_reason']
         update_message['message_type'] = 'updates'
 
-        if event['process_info']['status'] == DBStatus.failed and event['process_info']['stage'] = PipelineStages.algorithm:
+        if event['process_info']['status'] == DBStatus.failed and event['process_info']['stage'] == PipelineStages.algorithm:
             update_message['algorithm'] == event['info']['algoritmo']
 
         response = sns_manager.publish_message(
