@@ -44,7 +44,7 @@ def post_process_message(event, sns_manager):
         response = sns_manager.publish_message(
             process_message, os.environ['SNS_TOPIC_ARN'])
 
-    except Exception, e:
+    except Exception as e:
         print("Exception has ocurred: {}".format(e))
 
     return response

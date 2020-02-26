@@ -3,7 +3,6 @@ import os
 from utils.step_function import StepFunctionsManager
 from utils.orchestrator_utils import OrchestratorManager
 from utils.sns import SNSManager
-from utils.orchestrator_utils import OrchestratorManager
 from constants.common_constants import CommonConstants
 
 '''

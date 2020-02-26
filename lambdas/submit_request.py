@@ -1,7 +1,7 @@
 import json
 import os
 from botocore.vendored import requests
-from constants.regular_constants import *
+from constants.regular_constants import post_request_status,request_status,process_status,uuid
 from utils.orchestrator_utils import OrchestratorManager
 from constants.process_stages_enum import PipelineStages
 from constants.db_status_enum import DBStatus

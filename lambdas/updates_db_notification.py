@@ -1,6 +1,6 @@
 import json
 import os
-from constants.regular_constants import *
+from constants.regular_constants import uuid
 from utils.orchestrator_utils import OrchestratorManager
 from utils.dynamo_db import DBManager
 from constants.db_tables_enum import DBTables
@@ -42,7 +42,7 @@ def update_dynamo_table(message):
                 TableName=DBTables.info,
                 Env=os.environ['ENV'])
 
-            item['uuid'] = message['uuid']
+            item[uuid] = message[uuid]
             item['timestamp'] = message['timestamp']
             item['info'] = str(message['info'])
 
@@ -52,7 +52,7 @@ def update_dynamo_table(message):
                 TableName=DBTables.logs,
                 Env=os.environ['ENV'])
 
-            item['uuid'] = message['uuid']
+            item[uuid] = message[uuid]
             item['timestamp'] = message['timestamp']
             item['stage'] = message['stage']
             item['status'] = message['status']
