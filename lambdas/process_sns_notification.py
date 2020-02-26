@@ -1,6 +1,7 @@
 import json
 import os
 from constants.common_constants import CommonConstants
+from utils.orchestrator_utils import OrchestratorManager
 from utils.sns import SNSManager
 
 '''
@@ -10,7 +11,7 @@ from utils.sns import SNSManager
         ENV: DEV
 '''
 
-process_type = ["DISTRIBUITED_PROCESS", "SECUENTIAL_PROCESS"]
+process_type = [OrchestratorManager.DISTRIBUITED, OrchestratorManager.SECUENTIAL]
 init_process = 0
 
 

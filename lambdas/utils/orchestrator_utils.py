@@ -8,6 +8,9 @@ from constants.common_constants import CommonConstants
 
 class OrchestratorManager:
 
+    DISTRIBUITED = 'DistribuitedProcess'
+    SECUENTIAL = 'SecuentialProcess'
+
     @classmethod
     def get_uuid(self):
         uniq_id = str(uuid.uuid4())
@@ -34,7 +37,7 @@ class OrchestratorManager:
         return db_item
 
     @classmethod
-    def get_process_status_updates(self,region_name, update_topic_arn, uniq_id, proc_stage, proc_status, failure_reason = None):
+    def get_process_status_updates(self,region_name, update_topic_arn, uniq_id, proc_stage, proc_status, failure_reason ):
         sns_manager = SNSManager(region_name)
         item = {}
         try:
@@ -74,3 +77,11 @@ class OrchestratorManager:
             print("Exception ocurred: {}".format(e))
         
         return json.loads(alg_list)
+    
+    @classmethod
+    def get_request_search_prefix(self, request_type):
+        if request_type == OrchestratorManager.DISTRIBUITED:
+            return CommonConstants.dist_search_prefix
+        elif request_type == OrchestratorManager.SECUENTIAL:
+            return CommonConstants.sec_search_prefix
+        return None

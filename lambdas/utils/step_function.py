@@ -9,12 +9,12 @@ class StepFunctionsManager:
         self.client = boto3.client('stepfunctions')
         self.state_mach_arn = state_mach_arn
 
-    def execute_step_functions(self, message):
+    def execute_step_functions(self, message, prefix):
         try:
             print('sf message uuid: {}'.format(message['uuid']))
             response = self.client.start_execution(
                 stateMachineArn=self.state_mach_arn,
-                name=str(message['uuid']),
+                name='{}-{}'.format(prefix,str(message['uuid'])),
                 input=json.dumps(message)
             )
             print('Step Function start_execution response: {}'.format(response))

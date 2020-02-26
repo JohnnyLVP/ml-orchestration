@@ -32,13 +32,12 @@ def lambda_handler(event, context):
                 update_topic_arn=update_topic,
                 uniq_id=event[uuid],
                 proc_stage=PipelineStages.request,
-                proc_status=DBStatus.submitted
+                proc_status=DBStatus.submitted,
+                failure_reason = "None"
             )
 
             event[request_status] = CommonConstants.request_succeded
             event[process_status] = DBStatus.submitted
-        
-        else: raise Exception
 
     except Exception as e:
         print("Exception in process_campaign_update_notif lambda: {}".format(str(e)))

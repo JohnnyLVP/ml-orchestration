@@ -14,6 +14,8 @@ Environment Variables:
     BUCKET_NAME: belc-bigdata-models-dlk-dev
     DY_TABLE_NAME: DY-MLO-FinishedTraining-DEV
     ARN_SNS_TOPIC: 
+    MAX_SECUENTIAL_EXECUTIONS_ALLOWED: 1
+    MAX_DISTRIBIUTED_EXECUTIONS_ALLOWED: 3
 '''
 
 
@@ -22,21 +24,46 @@ def lambda_handler(event, context):
     print(json.dumps(event))
 
     try:
-        message = get_message_elements(event)
-        response = trigger_step_function(message)
+                
+        response = trigger_step_function(event)
 
     except Exception as e:
         print("Exception: {}".format(e))
 
+    return response
 
-def trigger_step_function(message):
+
+def trigger_step_function(event):
+    """
+        Has to do the following things:
+            - trigger the step function
+            - write info in dynamo table
+            - validate if is able to submit the process
+    """
+    message = get_message_elements(event)
+
     try:
+
+        notif_response = send_updates_info(message)
+
         state_machine_arn = os.environ['STATE_MACHINE_ARN']
         sf_manager = StepFunctionsManager(state_machine_arn)
 
-        can_trigger_step = 
+        can_trigger_step = can_submit_to_process(
+            sf_manager, message['process_type'])
 
-        response = sf_manager.execute_step_functions(message)
+        if not can_trigger_step:
+            return False
+
+        del_status = delete_message_from_sqs(event)
+
+        if not del_status:
+            raise Exception("Failed to delete message from SQS")
+
+        step_prefix = OrchestratorManager.get_request_search_prefix(
+            message['process_type'])
+        response = sf_manager.execute_step_functions(message, step_prefix)
+
     except Exception as e:
         print('Exception ocurred: {}'.format(e))
 
@@ -44,20 +71,14 @@ def trigger_step_function(message):
 
 
 def can_submit_to_process(sf_manager, execution_type):
-    """
-    this function checks if we can submit the process to the pipeline or not. It does checks like check if the process
-    is requesting either Predict or Train pipeline. It also sees if the number of execution are not overwhelming for the
-    pipeline.
-    :param sf_manager: step function manager
-    :param pipeline: Predict or Train
-    :return: boolean
-    """
-    if execution_type == RecommenderUtils.PREDICT:
+
+    if execution_type == OrchestratorManager.SECUENTIAL:
         max_exec_allowed = int(os.environ['MAX_SECUENTIAL_EXECUTIONS_ALLOWED'])
-    elif execution_type == RecommenderUtils.TRAIN:
+    elif execution_type == OrchestratorManager.DISTRIBUITED:
         max_exec_allowed = int(os.environ['MAX_DISTRIBIUTED_EXECUTIONS_ALLOWED'])
-    
-    search_prefix = RecommenderUtils.get_request_search_prefix(pipeline)
+
+    search_prefix = OrchestratorManager.get_request_search_prefix(
+        execution_type)
     exec_ids = sf_manager.get_running_sf_ids()
 
     print("search_prefix: {}".format(search_prefix))
@@ -87,31 +108,19 @@ def send_updates_info(message):
     except Exception as e:
         print("An exception has ocurred: {}".format(str(e)))
 
-'''
-def get_json_list():
-    try:
-        s3_bucket = os.environ['BUCKET_NAME']
-        file_path = os.environ['PATH_NAME']
-        s3_manager = S3Manager()
-        alg_list = s3_manager.get_file_object(s3_bucket, file_path)
+    return response
 
-    except Exception as e:
-        print("Exception ocurred: {}".format(e))
-
-    return json.loads(alg_list)
-'''
 
 def get_message_elements(event):
     message = json.loads(event['Records'][0]['body'])
     execution_order = message['init_process']
     process_type = message['process_type']
-    
+
     s3_bucket = os.environ['BUCKET_NAME']
     file_path = os.environ['PATH_NAME']
     try:
         mlo_manager = OrchestratorManager()
         algorithm_list = mlo_manager.get_json_list(s3_bucket, file_path)
-        # print(algorithm_list['Process']['DistribuitedProcess'])
         message['uuid'] = mlo_manager.get_uuid()
         if execution_order < len(algorithm_list['Process'][process_type]):
             message['info'] = algorithm_list['Process'][process_type][execution_order]
@@ -119,3 +128,21 @@ def get_message_elements(event):
     except Exception as e:
         print("Exception ocurred: {}".format(e))
     return message
+
+
+def delete_message_from_sqs(event):
+    """
+    this function deletes messages from sqs
+    :param event: event that caused invocation of lambda.
+    :return: boolean
+    """
+    try:
+        message = event['Records'][0]
+        receipt_handle = message['receiptHandle']
+        sqs_manager = SQSManager(message['eventSourceARN'])
+        delete_status = sqs_manager.delete_message(receipt_handle)
+        print("message deletion status from SQS: {}".format(delete_status))
+        return delete_status
+    except Exception as e:
+        print("Exception: {}".format(e))
+    return False
