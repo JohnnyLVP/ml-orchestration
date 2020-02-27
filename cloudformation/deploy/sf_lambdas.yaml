@@ -28,7 +28,7 @@ Resources:
     Type: AWS::StepFunctions::StateMachine
     Properties:
       StateMachineName:
-        Fn::Sub: SF-MLO-${Env}-${DeployTag}
+        Fn::Sub: SF-MLO-${Env}
       RoleArn:
         Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/IAM-MLO-LambdaExec-${Env}
       Fn::Transform:
@@ -36,6 +36,17 @@ Resources:
         Parameters:
           Location:
             Fn::Sub: s3://${TemplateUploadsBucket}/template-uploads/state_machine_def.json
+  RequestLambdaLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleRuntimes:
+        - Python3.6
+      Content:
+        S3Bucket: 
+          Ref: TemplateUploadsBucket
+        S3Key: ml-orchestration/deploy/requests-lambda-layer.zip
+      Description: Installed libraries for POST request
+      LayerName: requests-layer
   ProcessNotification:
     Type: AWS::Lambda::Function
     Properties:
@@ -45,10 +56,8 @@ Resources:
         Variables:
           APP_ENV:
             Ref: AppEnv
-          ORG:
-            Ref: Org
           REGION_NAME:
-            Fn::Sub: "${AWS::Region}"
+            Fn::Sub: ${AWS::Region}
           TOPIC_ARN:
             Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:SNS-MLO-Topic-${Env}
       Tags:
@@ -68,19 +77,19 @@ Resources:
         Value: Proyecto
       Handler: process_sns_notification.lambda_handler
       Role:
-        Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/${LambdaExecRole}
+        Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/IAM-MLO-LambdaExec-${Env}
       Runtime: python3.6
       Timeout: 10
       Code:
         S3Bucket:
           Ref: TemplateUploadsBucket
         S3Key:
-          Fn::Sub: template-uploads/${DeployTag}/process_sns_notification.zip
+          Fn::Sub: ml-orchestration/deploy/process_sns_notification.zip
   TriggerProcess:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName:
-        Fn::Sub: Lambda-MLO-triggeralgorithms-${Env}
+        Fn::Sub: Lambda-MLO-TriggerAlgorithms-${Env}
       Environment:
         Variables:
           APP_ENV:
@@ -93,11 +102,13 @@ Resources:
             Fn::GetAtt:
               -StateMachineRes
               -Arn
-          TOPIC_ARN:
-            Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${TopicName}
+          ARN_SNS_TOPIC:
+            Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:SNS-MLO-Topic-${Env}
           BUCKET_NAME:
             Ref: TemplateUploadsBucket
-          PATH_NAME: ml-orchestration/algorithm_list.json
+          PATH_NAME: ml-orchestration/deploy/algorithm_list.json
+          MAX_DISTRIBIUTED_EXECUTIONS_ALLOWED: 3
+          MAX_SECUENTIAL_EXECUTIONS_ALLOWED: 1            
       Tags:
       - Key: Name
         Value:
@@ -115,14 +126,168 @@ Resources:
         Value: Proyecto
       Handler: trigger_wf_process.lambda_handler
       Role:
-        Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/${LambdaExecRole}
+        Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/IAM-MLO-LambdaExec-${Env}
       Runtime: python3.6
       Timeout: 10
       Code:
         S3Bucket:
           Ref: TemplateUploadsBucket
         S3Key:
-          Fn::Sub: template-uploads/trigger_wf_process.zip
+          Fn::Sub: template-uploads/deploy/trigger_wf_process.zip
+  UpdatesNotification:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: Lambda-MLO-ProcessUpdates-${Env}
+      Environment:
+        Variables:
+          ENV:
+            Ref: Env    
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Sub: Lambda-MLO-ProcessUpdates-${Env}
+      - Key: Grupo
+        Value: MLOrchestration
+      - Key: Direccion
+        Value: TRAD
+      - Key: Entorno
+        Value:
+          Ref: Env
+      - Key: CTLAdmin
+        Value: 'NO'
+      - Key: Tipo
+        Value: Proyecto
+      Handler: updates_db_notification.lambda_handler
+      Role:
+        Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/IAM-MLO-LambdaExec-${Env}
+      Runtime: python3.6
+      Timeout: 10
+      Code:
+        S3Bucket:
+          Ref: TemplateUploadsBucket
+        S3Key:
+          Fn::Sub: template-uploads/deploy/updates_db_notification.zip
+  SubmitRequest:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: Lambda-MLO-SubmitRequests-${Env}
+      Environment:
+        Variables:
+          REGION_NAME:
+            Fn::Sub: ${AWS::Region}
+          SNS_TOPIC_ARN:
+            Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:SNS-MLO-Topic-${Env}
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Sub: Lambda-MLO-SubmitRequests-${Env}
+      - Key: Grupo
+        Value: MLOrchestration
+      - Key: Direccion
+        Value: TRAD
+      - Key: Entorno
+        Value:
+          Ref: Env
+      - Key: CTLAdmin
+        Value: 'NO'
+      - Key: Tipo
+        Value: Proyecto
+      Handler: submit_request.lambda_handler
+      Layers:
+        Fn::GetAtt:
+        - RequestLambdaLayer
+        - Arn
+      VpcConfig:
+        SecurityGroupIds:
+        - Ref: VPCSecurityGroupIDs
+        SubnetIds: 
+        - Ref: VPCSubnetIDsA
+        - Ref: VPCSubnetIDsB
+      Role:
+        Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/IAM-MLO-LambdaExec-${Env}
+      Runtime: python3.6
+      Timeout: 10
+      Code:
+        S3Bucket:
+          Ref: TemplateUploadsBucket
+        S3Key:
+          Fn::Sub: template-uploads/deploy/submit_request.zip
+  CheckProcessStatus:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: Lambda-MLO-CheckStatus-${Env}
+      Environment:
+        Variables:
+          DY_PROCESSING_TABLENAME:
+            Fn::Sub: DY-MLO-NotifProcessingLog-${Env}    
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Sub: Lambda-MLO-CheckStatus-${Env}
+      - Key: Grupo
+        Value: MLOrchestration
+      - Key: Direccion
+        Value: TRAD
+      - Key: Entorno
+        Value:
+          Ref: Env
+      - Key: CTLAdmin
+        Value: 'NO'
+      - Key: Tipo
+        Value: Proyecto
+      Handler: check_process_status.lambda_handler
+      Role:
+        Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/IAM-MLO-LambdaExec-${Env}
+      Runtime: python3.6
+      Timeout: 10
+      Code:
+        S3Bucket:
+          Ref: TemplateUploadsBucket
+        S3Key:
+          Fn::Sub: template-uploads/deploy/check_process_status.zip
+  PostProcessingStep:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: Lambda-MLO-PostProcessing-${Env}
+      Environment:
+        Variables:
+          PATH_NAME:
+            Fn::Sub: DY-MLO-NotifProcessingLog-${Env}    
+          REGION:
+            Fn::Sub: ${AWS::Region}
+          S3_BUCKET:
+            Ref: TemplateUploadsBucket
+          SNS_TOPIC_ARN:
+            Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:SNS-MLO-Topic-${Env}
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Sub: Lambda-MLO-PostProcessing-${Env}
+      - Key: Grupo
+        Value: MLOrchestration
+      - Key: Direccion
+        Value: TRAD
+      - Key: Entorno
+        Value:
+          Ref: Env
+      - Key: CTLAdmin
+        Value: 'NO'
+      - Key: Tipo
+        Value: Proyecto
+      Handler: check_process_status.lambda_handler
+      Role:
+        Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/IAM-MLO-LambdaExec-${Env}
+      Runtime: python3.6
+      Timeout: 10
+      Code:
+        S3Bucket:
+          Ref: TemplateUploadsBucket
+        S3Key:
+          Fn::Sub: template-uploads/deploy/check_process_status.zip
   ProcessStatusEventSourceMapping:
     Type: AWS::Lambda::EventSourceMapping
     Properties:

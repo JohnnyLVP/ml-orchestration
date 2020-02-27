@@ -21,7 +21,7 @@ DY_PROCESSING_TABLENAME: DY-MLO-NotifProcessingLog-DEV
 def lambda_handler(event, context):
    
    print(json.dumps(event))
-   body = dict(event)
+   body = event
    mlo_manager = OrchestratorManager()
    try:
       stage, db_status, status_init_time, failure_reason = get_current_status_db(body)
@@ -36,7 +36,7 @@ def lambda_handler(event, context):
                status = DBStatus.failed
                error_code = ErrorCodes.proc_timeout
       else:
-         total_time_spent_so_far = mlo_manager.get_time_duration(event['start_time'])
+         total_time_spent_so_far = mlo_manager.get_time_duration(body['info']['avg_wait_time'])
          if total_time_spent_so_far > 2*60*60*1000:
                print("Total time taken for execution has exceeded the timeout, hence going to stop the execution")
                status = DBStatus.failed
@@ -50,7 +50,7 @@ def lambda_handler(event, context):
       return body
 
    except Exception as e: 
-      print("Ocurred an exception: {}".format(str(e))) 
+      print("Ocurred an exception 1: {}".format(str(e))) 
  
 def get_current_status_db(message):
    dy_processing_table = os.environ['DY_PROCESSING_TABLENAME']
@@ -90,3 +90,4 @@ def get_current_status_db(message):
       print("Exception while getting dynamo items: {}".format(str(e)))
 
    
+

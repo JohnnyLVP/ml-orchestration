@@ -18,7 +18,7 @@ Environment Variables:
 
 
 def lambda_handler(event, context):
-    # TODO implement
+
     print(json.dumps(event))
 
     try:
