@@ -46,7 +46,7 @@ run_steps(){
 
   arr_setup_files=($(ls -d cloudformation/setup/*))
   for setup_file in "${arr_setup_files[@]}"; do
-    mv $setup_file $tmp_setup/
+    cp $setup_file $tmp_setup/
   done
 
   aws s3 sync $tmp_dir_parent s3://$wrk_space_bucket/ml-orchestration/
