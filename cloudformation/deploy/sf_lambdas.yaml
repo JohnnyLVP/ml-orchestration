@@ -69,8 +69,7 @@ Resources:
       - Key: Direccion
         Value: TRAD
       - Key: Entorno
-        Value:
-          Ref: Env
+        Value: !Ref Env
       - Key: CTLAdmin
         Value: 'NO'
       - Key: Tipo
@@ -104,8 +103,7 @@ Resources:
               -Arn
           ARN_SNS_TOPIC:
             Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:SNS-MLO-Topic-${Env}
-          BUCKET_NAME:
-            Ref: TemplateUploadsBucket
+          BUCKET_NAME: !Ref TemplateUploadsBucket
           PATH_NAME: ml-orchestration/deploy/algorithm_list.json
           MAX_DISTRIBIUTED_EXECUTIONS_ALLOWED: 3
           MAX_SECUENTIAL_EXECUTIONS_ALLOWED: 1            

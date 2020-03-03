@@ -1,4 +1,14 @@
-request_status = 'request_status'
-process_status = 'process_status'
-uuid = 'uuid'
+request_status = "request_status"
+process_status = "process_status"
+uuid = "uuid"
 post_request_status = 200
+country = "country"
+campaign = "campaign"
+env = "env"
+message_type = "message_type"
+process_type = "process_type"
+init_process = "init_process"
+timestamp_string = "timestamp"
+info = "info"
+algorithm = "algorithm"
+list_process = "Process"

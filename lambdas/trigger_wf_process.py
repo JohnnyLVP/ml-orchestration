@@ -1,20 +1,10 @@
 import json
 import os
 from utils.step_function import StepFunctionsManager
+from constants.regular_constants import process_type, uuid, info, country, campaign, timestamp_string, message_type, algorithm, init_process,list_process
 from utils.orchestrator_utils import OrchestratorManager
 from utils.sns import SNSManager
 from constants.common_constants import CommonConstants
-
-'''
-Environment Variables:
-    PATH_NAME: ml-orchestration/algorithm_list.json
-    STATE_MACHINE_ARN: arn:aws:states:us-east-1:639556434474:stateMachine:SF-MLO-DEV
-    BUCKET_NAME: belc-bigdata-models-dlk-dev
-    DY_TABLE_NAME: DY-MLO-FinishedTraining-DEV
-    ARN_SNS_TOPIC: 
-    MAX_SECUENTIAL_EXECUTIONS_ALLOWED: 1
-    MAX_DISTRIBIUTED_EXECUTIONS_ALLOWED: 3
-'''
 
 
 def lambda_handler(event, context):
@@ -43,12 +33,13 @@ def trigger_step_function(event):
     try:
 
         notif_response = send_updates_info(message)
+        print("Response: {}".format(notif_response))
 
         state_machine_arn = os.environ['STATE_MACHINE_ARN']
         sf_manager = StepFunctionsManager(state_machine_arn)
 
         can_trigger_step = can_submit_to_process(
-            sf_manager, message['process_type'])
+            sf_manager, message[process_type])
 
         if not can_trigger_step:
             return False
@@ -59,7 +50,7 @@ def trigger_step_function(event):
             raise Exception("Failed to delete message from SQS")
 
         step_prefix = OrchestratorManager.get_request_search_prefix(
-            message['process_type'])
+            message[process_type])
         response = sf_manager.execute_step_functions(message, step_prefix)
 
     except Exception as e:
@@ -73,7 +64,8 @@ def can_submit_to_process(sf_manager, execution_type):
     if execution_type == OrchestratorManager.SECUENTIAL:
         max_exec_allowed = int(os.environ['MAX_SECUENTIAL_EXECUTIONS_ALLOWED'])
     elif execution_type == OrchestratorManager.DISTRIBUITED:
-        max_exec_allowed = int(os.environ['MAX_DISTRIBIUTED_EXECUTIONS_ALLOWED'])
+        max_exec_allowed = int(
+            os.environ['MAX_DISTRIBIUTED_EXECUTIONS_ALLOWED'])
 
     search_prefix = OrchestratorManager.get_request_search_prefix(
         execution_type)
@@ -90,15 +82,16 @@ def send_updates_info(message):
     sns_manager = SNSManager(os.environ['REGION_NAME'])
     mlo_manager = OrchestratorManager()
     body = {}
-
+    # se cambio body[info][codpais] por country
+    # se cambio body[info][aniocampana] por campaign
     try:
-        body['uuid'] = message['uuid']
-        body['timestamp'] = mlo_manager.get_current_timestamp()
-        body['info'] = {}
-        body['info']['algoritmh'] = message['info']['algoritmo']
-        body['info']['codpais'] = message['country']
-        body['info']['aniocampana'] = message['campaign']
-        body['message_type'] = CommonConstants.sns_update_filter
+        body[uuid] = message[uuid]
+        body[timestamp_string] = mlo_manager.get_current_timestamp()
+        body[info] = {}
+        body[info][algorithm] = message[info][algorithm]
+        body[info][country] = message[country]
+        body[info][campaign] = message[campaign]
+        body[message_type] = CommonConstants.sns_update_filter
 
         response = sns_manager.publish_message(body,
                                                os.environ['ARN_SNS_TOPIC'])
@@ -111,17 +104,17 @@ def send_updates_info(message):
 
 def get_message_elements(event):
     message = json.loads(event['Records'][0]['body'])
-    execution_order = message['init_process']
-    process_type = message['process_type']
+    execution_order = message[init_process]
+    process_type_value = message[process_type]
 
     s3_bucket = os.environ['BUCKET_NAME']
     file_path = os.environ['PATH_NAME']
     try:
         mlo_manager = OrchestratorManager()
         algorithm_list = mlo_manager.get_json_list(s3_bucket, file_path)
-        message['uuid'] = mlo_manager.get_uuid()
-        if execution_order < len(algorithm_list['Process'][process_type]):
-            message['info'] = algorithm_list['Process'][process_type][execution_order]
+        message[uuid] = mlo_manager.get_uuid()
+        if execution_order < len(algorithm_list[list_process][process_type_value]):
+            message[info] = algorithm_list[list_process][process_type_value][execution_order]
 
     except Exception as e:
         print("Exception ocurred: {}".format(e))

@@ -4,13 +4,13 @@
         "DistribuitedProcess": 
             [
                 {
-                    "algoritmo": "Recommender",
+                    "algorithm": "Recommender",
                     "endpoint":"https://leo3hmu4fc.execute-api.us-east-1.amazonaws.com/dev/api/train-all",
                     "avg_wait_time": 300,
                     "payload": {"epoch":"1557151604"}
                 },
                 {
-                    "algoritmo": "DigitalForecast",
+                    "algorithm": "DigitalForecast",
                     "endpoint":"http://digitalforecast.somosbelcorp.com/api/train-all",
                     "avg_wait_time":"",
                     "payload":""
@@ -19,19 +19,19 @@
         "SecuentialProcess":
             [
                 {
-                    "algoritmo":"DeoModel",
+                    "algorithm":"DeoModel",
                     "endpoint":"http://deomodel.somosbelcorp.com/api/train-all",
                     "avg_wait_time":"",
                     "payload":""
                 },
                 {
-                    "algoritmo":"CreadorOfertas",
+                    "algorithm":"CreadorOfertas",
                     "endpoint":"http://creadorofertas.somosbelcorp.com/api/training",
                     "avg_wait_time":"",
                     "payload":""
                 },
                 {
-                    "algoritmo":"PaseDePedido",
+                    "algorithm":"PaseDePedido",
                     "endpoint":"http://pasedepedido.somosbelcorp.com/api/training",
                     "avg_wait_time":"",
                     "payload":""
