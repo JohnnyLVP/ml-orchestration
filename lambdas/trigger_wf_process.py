@@ -4,6 +4,7 @@ from utils.step_function import StepFunctionsManager
 from constants.regular_constants import process_type, uuid, info, country, campaign, timestamp_string, message_type, algorithm, init_process,list_process
 from utils.orchestrator_utils import OrchestratorManager
 from utils.sns import SNSManager
+from utils.sqs import SQSManager
 from constants.common_constants import CommonConstants
 
 

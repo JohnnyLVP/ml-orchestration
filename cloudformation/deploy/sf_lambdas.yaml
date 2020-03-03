@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: AWS Step Functions for Recommender
+Description: AWS Step Functions for the Machine Learning Orchestrator
 Parameters:
   Env:
     Type: String
@@ -8,9 +8,6 @@ Parameters:
   AppEnv:
     Type: String
     Description: 'application environment (lowercase only), ex: dev, qas, prd'
-  Org:
-    Type: String
-    Description: 'organization (lowercase only), ex: belc (belcorp)'
   TemplateUploadsBucket:
     Type: String
     Description: S3 bucket for referenced templates
@@ -93,8 +90,6 @@ Resources:
         Variables:
           APP_ENV:
             Ref: AppEnv
-          ORG:
-            Ref: Org
           REGION_NAME:
             Fn::Sub: "${AWS::Region}"
           STATE_MACHINE_ARN:
@@ -139,8 +134,10 @@ Resources:
         Fn::Sub: Lambda-MLO-ProcessUpdates-${Env}
       Environment:
         Variables:
-          ENV:
-            Ref: Env    
+          DY_INFO_TABLE_NAME:
+            Fn::Sub: DY-MLO-ProcessInfo-${Env}
+          DY_PROCESSING_TABLE_NAME:
+            Fn::Sub: DY-MLO-NotifProcessingLog-${Env}
       Tags:
       - Key: Name
         Value:
@@ -223,15 +220,13 @@ Resources:
             Fn::Sub: DY-MLO-NotifProcessingLog-${Env}    
       Tags:
       - Key: Name
-        Value:
-          Fn::Sub: Lambda-MLO-CheckStatus-${Env}
+        Value: Fn::Sub: Lambda-MLO-CheckStatus-${Env}
       - Key: Grupo
         Value: MLOrchestration
       - Key: Direccion
         Value: TRAD
       - Key: Entorno
-        Value:
-          Ref: Env
+        Value: !Ref Env
       - Key: CTLAdmin
         Value: 'NO'
       - Key: Tipo
@@ -303,33 +298,28 @@ Outputs:
       Fn::GetAtt:
       - StateMachineRes
       - Name
-  triggerprocesswf:
+  TriggerProcess:
     Value:
       Fn::GetAtt:
-      - triggerprocesswf
+      - TriggerProcess
       - Arn
-  processwfupdates:
+  UpdatesNotification:
     Value:
       Fn::GetAtt:
-      - processwfupdates
+      - UpdatesNotification
       - Arn
-  PostProcessingCleanup:
+  PostProcessingStep:
     Value:
       Fn::GetAtt:
-      - PostProcessingCleanup
-      - Arn
-  PerformPostProcessSteps:
-    Value:
-      Fn::GetAtt:
-      - PerformPostProcessSteps
+      - PostProcessingStep
       - Arn
   CheckProcessStatus:
     Value:
       Fn::GetAtt:
       - CheckProcessStatus
       - Arn
-  SubmitToProcess:
+  SubmitRequest:
     Value:
       Fn::GetAtt:
-      - SubmitToProcess
+      - SubmitRequest
       - Arn
