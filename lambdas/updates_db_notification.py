@@ -34,7 +34,7 @@ def update_dynamo_table(message):
     mlo_manager = OrchestratorManager()
     db_manager = DBManager()
     item = {}
-    status = True
+    status_db = True
     try:
 
         if message.get(info):
@@ -55,12 +55,12 @@ def update_dynamo_table(message):
 
         db_items = mlo_manager.format_db_item(message_item=item)
 
-        status = db_manager.put_item(
+        status_db = db_manager.put_item(
             table_name=dy_tablename,
             item=db_items)
 
     except Exception as e:
         print("Exception has ocurred: {}".format(str(e)))
-        status = False
+        status_db = False
 
-    return dy_tablename, status
+    return dy_tablename, status_db
