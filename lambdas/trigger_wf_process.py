@@ -19,6 +19,7 @@ def lambda_handler(event, context):
 
     except Exception as e:
         print("Exception: {}".format(e))
+        raise 
 
 
 
@@ -41,14 +42,16 @@ def trigger_step_function(event):
 
         can_trigger_step = can_submit_to_process(
             sf_manager, message[process_type])
-
+    
+        print("can_trigger_step:{}".format(can_trigger_step))
+        
         if not can_trigger_step:
             return False
 
-        del_status = delete_message_from_sqs(event)
+        #del_status = delete_message_from_sqs(event)
 
-        if not del_status:
-            raise Exception("Failed to delete message from SQS")
+        #if not del_status:
+        #    raise Exception("Failed to delete message from SQS")
 
         step_prefix = OrchestratorManager.get_request_search_prefix(
             message[process_type])
@@ -58,6 +61,7 @@ def trigger_step_function(event):
 
     except Exception as e:
         print('Exception ocurred: {}'.format(e))
+        raise e
 
 
 def can_submit_to_process(sf_manager, execution_type):
@@ -75,6 +79,10 @@ def can_submit_to_process(sf_manager, execution_type):
     print("search_prefix: {}".format(search_prefix))
     print("exec_ids: {}".format(exec_ids))
     running = sum(idx.startswith(search_prefix) for idx in exec_ids)
+    
+    print(running)
+    print(max_exec_allowed)
+    
     return running < max_exec_allowed
 
 
