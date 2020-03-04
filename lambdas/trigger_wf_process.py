@@ -14,12 +14,12 @@ def lambda_handler(event, context):
 
     try:
 
-        response = trigger_step_function(event)
+        if not trigger_step_function(event):
+            raise Exception("Max limit reached. Will retry again after sometime")
 
     except Exception as e:
         print("Exception: {}".format(e))
 
-    return response
 
 
 def trigger_step_function(event):
@@ -54,10 +54,10 @@ def trigger_step_function(event):
             message[process_type])
         response = sf_manager.execute_step_functions(message, step_prefix)
 
+        return True
+
     except Exception as e:
         print('Exception ocurred: {}'.format(e))
-
-    return response
 
 
 def can_submit_to_process(sf_manager, execution_type):
