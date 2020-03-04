@@ -5,7 +5,7 @@ from constants.regular_constants import country, campaign, env, message_type, pr
 from utils.orchestrator_utils import OrchestratorManager
 from utils.sns import SNSManager
 
-process_type = [OrchestratorManager.DISTRIBUITED, OrchestratorManager.SECUENTIAL]
+process_type_list = [OrchestratorManager.DISTRIBUITED, OrchestratorManager.SECUENTIAL]
 init_index = 0
 
 def lambda_handler(event, context):
@@ -24,7 +24,7 @@ def lambda_handler(event, context):
         message_item[country] = json.loads(message)['codPais']
         message_item[campaign] = json.loads(message)['anioCampania']
 
-        response = notif_status_notification(message_item, topic_arn, process_type)
+        response = notif_status_notification(message_item, topic_arn, process_type_list)
         print('Sent notification status: {}'.format(response))
 
     except Exception as e:
@@ -47,7 +47,7 @@ def notif_status_notification(message, sns_topic, process_list):
 
     return notif_validation
 
-def process_mlo_notification(message, topic_arn, process_type):
+def process_mlo_notification(message, topic_arn, process_type_value):
     '''
 
     :param message:
@@ -55,18 +55,22 @@ def process_mlo_notification(message, topic_arn, process_type):
     :param process_type:
     :return:
     '''
-
+    
     region_name = os.environ['REGION_NAME']
     sns_manager = SNSManager(region_name)
 
     try:
         process_message = dict(message)
+        
         process_message[env] = os.environ['ENV']
         process_message[message_type] = CommonConstants.sns_process_filter
-        process_message[process_type] = process_type
+        process_message[process_type] = process_type_value
         process_message[init_process] = init_index
+        
         response = sns_manager.publish_message(process_message, topic_arn)
+        
+        return response
     except Exception as e:
         print("Exception in publishing message to SNS: {}".format(e))
 
-    return response
+    
