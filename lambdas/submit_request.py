@@ -1,7 +1,7 @@
 import json
 import os
 import requests
-from constants.regular_constants import mlo_uuid, post_request_status, none_failure_reason, request_status, process_status, uuid, process_info, status, country, campaign, info, algortihm_payload, endpoint
+from constants.regular_constants import mlo_uuid, request_ok_status,request_created_status, none_failure_reason, request_status, process_status, uuid, process_info, status, country, campaign, info, algortihm_payload, endpoint
 from utils.orchestrator_utils import OrchestratorManager
 from constants.process_stages_enum import PipelineStages
 from constants.db_status_enum import DBStatus
@@ -29,7 +29,7 @@ def lambda_handler(event, context):
         print(response.content)
         
 
-        if response.status_code == post_request_status:
+        if response.status_code in [request_ok_status, request_created_status]:
             failure_reason = none_failure_reason
             event[request_status] = CommonConstants.request_succeded
             event[process_info][status] = DBStatus.submitted

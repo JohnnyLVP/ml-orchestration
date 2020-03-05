@@ -1,7 +1,8 @@
 request_status = "request_status"
 process_status = "process_status"
 uuid = "uuid"
-post_request_status = 200
+request_ok_status = 200
+request_created_status = 201
 country = "country"
 campaign = "campaign"
 env = "env"

@@ -72,11 +72,11 @@ def get_current_status_db(message):
             if db_stage == PipelineStages.algorithm and db_status in [DBStatus.succeeded, DBStatus.failed]:
                 return db_stage, db_status, created_at, db_failure_reason
 
-            if db_stage == PipelineStages.algorithm and db_status in [DBStatus.running]:
-                r_stage = db_stage
-                r_status = db_status
-                r_created_at = created_at
-                r_failure_reason = db_failure_reason
+            #if db_stage == PipelineStages.algorithm and db_status in [DBStatus.running]:
+            r_stage = db_stage
+            r_status = db_status
+            r_created_at = created_at
+            r_failure_reason = db_failure_reason
 
         return r_stage, r_status, r_created_at, r_failure_reason
 

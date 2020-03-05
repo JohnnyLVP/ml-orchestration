@@ -20,9 +20,9 @@
             [
                 {
                     "algorithm":"DeoModel",
-                    "endpoint":"http://deomodel.somosbelcorp.com/api/train-all",
-                    "avg_wait_time":"",
-                    "payload":""
+                    "endpoint":"https://reqres.in/api/train-all",
+                    "avg_wait_time":"300",
+                    "payload": {"seed":10}
                 },
                 {
                     "algorithm":"CreadorOfertas",
