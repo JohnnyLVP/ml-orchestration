@@ -8,6 +8,7 @@ from constants.process_stages_enum import PipelineStages
 from constants.regular_constants import *
 from constants.common_constants import CommonConstants
 
+
 def lambda_handler(event, context):
 
     print(json.dumps(event))
@@ -45,13 +46,23 @@ def post_process_message(event, sns_manager):
         if current_execution_order < len(algorithm_list[list_process][event[process_type]]):
             process_message[init_process] = current_execution_order + 1
 
-        response = sns_manager.publish_message(
-            process_message, os.environ['SNS_TOPIC_ARN'])
+            response = sns_manager.publish_message(
+                process_message, os.environ['SNS_TOPIC_ARN'])
+
+            return response
+            
+        else:
+            print(
+                "Algorithms in execution {execution_type} list has finished the training for country: {country}, campaign: {campaign}".format(
+                    execution_type= process_message[process_type],
+                    country = process_message[country],
+                    campaign = process_message[campaign]
+                ))
 
     except Exception as e:
         print("Exception has ocurred: {}".format(e))
 
-    return response
+    
 
 
 def post_updates_message(event, sns_manager):

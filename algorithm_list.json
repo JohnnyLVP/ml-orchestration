@@ -21,7 +21,7 @@
                 {
                     "algorithm":"DeoModel",
                     "endpoint":"https://reqres.in/api/train-all",
-                    "avg_wait_time":"300",
+                    "avg_wait_time": 300,
                     "payload": {"seed":10}
                 },
                 {
