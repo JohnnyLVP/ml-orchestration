@@ -37,7 +37,7 @@ class OrchestratorManager:
         return db_item
 
     @classmethod
-    def get_process_status_updates(self,region_name, update_topic_arn, uniq_id, proc_stage, proc_status, failure_reason ):
+    def get_process_status_updates(self,region_name, update_topic_arn, uniq_id, proc_stage, proc_status, failure_reason_message ):
         sns_manager = SNSManager(region_name)
         item = {}
         try:
@@ -45,7 +45,7 @@ class OrchestratorManager:
             item['timestamp'] = self.get_current_timestamp()
             item['stage'] = proc_stage
             item['status'] = proc_status
-            item['failure_reason'] = failure_reason
+            item['failure_reason'] = failure_reason_message
             item['message_type'] = CommonConstants.sns_update_filter
             
             response = sns_manager.publish_message(

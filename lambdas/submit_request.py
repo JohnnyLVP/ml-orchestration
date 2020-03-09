@@ -35,6 +35,7 @@ def lambda_handler(event, context):
         if response.status_code in [request_ok_status, request_created_status]:
             event[request_status] = CommonConstants.request_succeded
             event[process_info][status] = DBStatus.submitted 
+            event[process_info][failure_reason] = none_failure_reason
         else:
             event[request_status] = CommonConstants.request_failed
             event[process_info][status] = DBStatus.failed
@@ -46,7 +47,7 @@ def lambda_handler(event, context):
             uniq_id=event[uuid],
             proc_stage=PipelineStages.request,
             proc_status=DBStatus.submitted,
-            failure_reason=event[process_info][failure_reason]
+            failure_reason_message=event[process_info][failure_reason]
         )
 
     except Exception as e:
@@ -58,7 +59,7 @@ def lambda_handler(event, context):
             uniq_id=event[uuid],
             proc_stage=PipelineStages.request,
             proc_status=DBStatus.failed,
-            failure_reason=event[process_info][failure_reason]
+            failure_reason_message=event[process_info][failure_reason]
         )
         event[request_status] = CommonConstants.request_failed
         event[process_info][status] = DBStatus.failed
