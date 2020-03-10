@@ -281,6 +281,17 @@ Resources:
           Ref: TemplateUploadsBucket
         S3Key:
           Fn::Sub: template-uploads/deploy/check_process_status.zip
+  UpdateStatusEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      BatchSize: 1
+      Enabled: true
+      EventSourceArn:
+        Fn::Sub: arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:SQS-MLO-UpdateQueue-${Env}
+      FunctionName:
+        Fn::GetAtt:
+        - UpdatesNotification
+        - Arn
   ProcessStatusEventSourceMapping:
     Type: AWS::Lambda::EventSourceMapping
     Properties:
@@ -290,7 +301,7 @@ Resources:
         Fn::Sub: arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:SQS-MLO-ProcessQueue-${Env}
       FunctionName:
         Fn::GetAtt:
-        - processwfupdates
+        - TriggerProcess
         - Arn
 Outputs:
   StateMachineRes:
