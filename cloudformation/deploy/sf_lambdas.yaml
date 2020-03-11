@@ -12,13 +12,13 @@ Parameters:
     Type: String
     Description: S3 bucket for referenced templates
   VPCSubnetIDsA:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
     Description: The list of SubnetIds in your Virtual Private Cloud (VPC)
   VPCSubnetIDsB:
-    Type: String
+    Type: AWS::EC2::Subnet::Id
     Description: The list of SubnetIds in your Virtual Private Cloud (VPC)
   VPCSecurityGroupIDs:
-    Type: String
+    Type: AWS::EC2::SecurityGroup::Id
     Description: The list of SubnetIds in your Virtual Private Cloud (VPC)
 Resources:
   StateMachineRes:
@@ -126,7 +126,7 @@ Resources:
         S3Bucket:
           Ref: TemplateUploadsBucket
         S3Key:
-          Fn::Sub: template-uploads/deploy/trigger_wf_process.zip
+          template-uploads/deploy/trigger_wf_process.zip
   UpdatesNotification:
     Type: AWS::Lambda::Function
     Properties:
@@ -162,7 +162,7 @@ Resources:
         S3Bucket:
           Ref: TemplateUploadsBucket
         S3Key:
-          Fn::Sub: template-uploads/deploy/updates_db_notification.zip
+          template-uploads/deploy/updates_db_notification.zip
   SubmitRequest:
     Type: AWS::Lambda::Function
     Properties:
@@ -207,8 +207,8 @@ Resources:
       Code:
         S3Bucket:
           Ref: TemplateUploadsBucket
-        S3Key:
-          Fn::Sub: template-uploads/deploy/submit_request.zip
+        S3Key: 
+          template-uploads/deploy/submit_request.zip
   CheckProcessStatus:
     Type: AWS::Lambda::Function
     Properties:
@@ -220,7 +220,8 @@ Resources:
             Fn::Sub: DY-MLO-NotifProcessingLog-${Env}    
       Tags:
       - Key: Name
-        Value: Fn::Sub: Lambda-MLO-CheckStatus-${Env}
+        Value:
+          Fn::Sub: Lambda-MLO-CheckStatus-${Env}
       - Key: Grupo
         Value: MLOrchestration
       - Key: Direccion
@@ -239,8 +240,8 @@ Resources:
       Code:
         S3Bucket:
           Ref: TemplateUploadsBucket
-        S3Key:
-          Fn::Sub: template-uploads/deploy/check_process_status.zip
+        S3Key: 
+          template-uploads/deploy/check_process_status.zip
   PostProcessingStep:
     Type: AWS::Lambda::Function
     Properties:
@@ -279,8 +280,8 @@ Resources:
       Code:
         S3Bucket:
           Ref: TemplateUploadsBucket
-        S3Key:
-          Fn::Sub: template-uploads/deploy/check_process_status.zip
+        S3Key: 
+          template-uploads/deploy/check_process_status.zip
   UpdateStatusEventSourceMapping:
     Type: AWS::Lambda::EventSourceMapping
     Properties:
