@@ -32,7 +32,7 @@ Resources:
         Name: AWS::Include
         Parameters:
           Location:
-            Fn::Sub: s3://${TemplateUploadsBucket}/template-uploads/state_machine_def.json
+            Fn::Sub: s3://${TemplateUploadsBucket}/template-uploads/deploy/state_machine_def.json
   RequestLambdaLayer:
     Type: AWS::Lambda::LayerVersion
     Properties:
