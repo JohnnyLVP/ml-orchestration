@@ -1,5 +1,4 @@
-DefinitionString:
- Fn::Sub: |
+|-
  {
   "Comment": "Step to Submit request to Algorithm API",
   "StartAt": "SubmitRequest",

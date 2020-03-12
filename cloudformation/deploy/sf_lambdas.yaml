@@ -22,18 +22,28 @@ Parameters:
     Description: The list of SubnetIds in your Virtual Private Cloud (VPC)
 Resources:
   StateMachineRes:
+    DependsOn:
+      - SubmitRequest
+      - CheckProcessStatus
+      - PostProcessingStep
     Type: AWS::StepFunctions::StateMachine
     Properties:
       StateMachineName:
         Fn::Sub: SF-MLO-${Env}
       RoleArn:
         Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/IAM-MLO-LambdaExec-${Env}
-      'Fn::Transform:'
-        Name: 'AWS::Include'
-        Parameters:
-          Location: !Sub
-            - s3://${BucketReference}/ml-orchestration/deploy/state_machine_def.json
-            - {BucketReference: !Ref TemplateUploadsBucket}
+      DefinitionString: !Sub
+      - Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: !Sub
+              - s3://${BucketReference}/ml-orchestration/deploy/state_machine_def.json
+              - {BucketReference: !Ref TemplateUploadsBucket}
+      - { 
+          RequestLambda: !Ref SubmitRequest.arn,
+          CheckProcessLambda: !Ref CheckProcessStatus.arn,
+          PostProcessLambda: !Ref PostProcessingStep.arn
+        }
   RequestLambdaLayer:
     Type: AWS::Lambda::LayerVersion
     Properties:
