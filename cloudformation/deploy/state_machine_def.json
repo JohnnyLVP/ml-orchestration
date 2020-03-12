@@ -6,7 +6,7 @@ DefinitionString:
   "States": {
     "SubmitRequest": {
       "Type": "Task",
-      "Resource": "arn:aws:lambda:us-east-1:639556434474:function:Lambda-MLO-SubmitRequests-DEV",
+      "Resource": "${SubmitRequest.arn}",
       "Next": "CheckProcessRequestStatus"
     },
     "CheckProcessRequestStatus": {
@@ -32,7 +32,7 @@ DefinitionString:
     },
     "CheckProcessStatus":{
       "Type":"Task",
-      "Resource":"arn:aws:lambda:us-east-1:639556434474:function:Lambda-MLO-CheckProcessStatus-DEV",
+      "Resource":"${CheckProcessStatus.arn}",
       "Next":"ChoiceOnProcessStatus"
     },
     "ChoiceOnProcessStatus":{
@@ -57,7 +57,7 @@ DefinitionString:
     },
     "PostProcessingStep":{
       "Type": "Task",
-      "Resource": "arn:aws:lambda:us-east-1:639556434474:function:Lambda-MLO-PostProcessingStep-DEV",
+      "Resource": "${PostProcessingStep.arn}",
       "End": true
     }
   }
