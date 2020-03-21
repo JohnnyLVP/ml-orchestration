@@ -5,9 +5,6 @@ Parameters:
   Env:
     Type: String
     Description: 'environment (uppercase only), ex: QAS, PRD'
-  AppEnv:
-    Type: String
-    Description: 'application environment (lowercase only), ex: qas, prd'
 Resources:
   TopicRes:
     Type: AWS::SNS::Topic

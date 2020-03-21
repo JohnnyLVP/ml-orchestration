@@ -9,12 +9,9 @@ Parameters:
     Type: String
     Description: 'application environment (lowercase only), ex: qas, prd'
     Default: qas
-  DeployTag:
-    Type: String
-    Description: 'deployment tag (lowercase only) ex: blue, green'
   Org:
     Type: String
-    Description: 'organization (lowercase only), ex: sig (sigmoid), belc (belcorp)'
+    Description: 'organization (lowercase only), ex: belc (belcorp)'
     Default: belc
   VPCId:
     Type: AWS::EC2::VPC::Id
@@ -32,7 +29,7 @@ Resources:
           Ref: AppEnv
         Org:
           Ref: Org
-        MyVPCId:
+        MyVpcId:
           Ref: VPCId
   MloDynamoDBStack:
     Type: AWS::CloudFormation::Stack
@@ -43,10 +40,10 @@ Resources:
         Env:
           Ref: Env
   SnsSqsResources:
-    Type: AWS::Cloudformation::Stack
+    Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL:
         Fn::Sub: https://s3.amazonaws.com/${Org}-bigdata-models-dlk-${AppEnv}/ml-orchestration/setup/dynamodb.yaml
       Parameters:
-        Env: !Ref Env
-        AppEnv: !Ref AppEnv
+        Env: 
+          Ref: Env

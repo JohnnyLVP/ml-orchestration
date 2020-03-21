@@ -248,7 +248,7 @@ Resources:
       - Key: Tipo
         Value: Proyecto
       Handler: check_process_status.lambda_handler
-      Role:
+      Role:jvalenzuelap@belcorp.biz
         Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/IAM-MLO-LambdaExec-${Env}
       Runtime: python3.6
       Timeout: 10
@@ -279,6 +279,16 @@ Resources:
         Fn::GetAtt:
         - TriggerProcess
         - Arn
+  NotifStatusSourceMapping:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn:
+        Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:sns-bigdata-cierrecampania-${Env}
+      Endpoint: 
+        Fn::GetAtt:
+          - ProcessNotification
+          - Arn
+      Protocol: lambda
 Outputs:
   TriggerProcess:
     Value:
