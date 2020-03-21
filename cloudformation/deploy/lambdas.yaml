@@ -248,7 +248,6 @@ Resources:
       - Key: Tipo
         Value: Proyecto
       Handler: check_process_status.lambda_handler
-      Role:jvalenzuelap@belcorp.biz
         Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/IAM-MLO-LambdaExec-${Env}
       Runtime: python3.6
       Timeout: 10

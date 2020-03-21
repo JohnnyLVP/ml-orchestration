@@ -14,6 +14,7 @@ Parameters:
     Description: 'organization (lowercase only), ex: belc (belcorp)'
     Default: belc
   MyTemplateUploadsBucket:
+    Default: belc-bigdata-models-dlk-dev
     Type: String
     Description: S3 bucket for referenced templates
   MyVPCSubnetIDsA:
@@ -30,7 +31,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL:
-        Fn::Sub: https://s3.amazonaws.com/${Org}-bigdata-models-dlk-${AppEnv}/deploy/lambdas.yaml
+        Fn::Sub: https://s3.amazonaws.com/${Org}-bigdata-models-dlk-${AppEnv}/ml-orchestration/deploy/lambdas.yaml
       Parameters:
         Env:
           Ref: Env
@@ -48,7 +49,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL:
-        Fn::Sub: https://s3.amazonaws.com/${Org}-bigdata-models-dlk-${AppEnv}/deploy/step_function.yaml
+        Fn::Sub: https://s3.amazonaws.com/${Org}-bigdata-models-dlk-${AppEnv}/ml-orchestration/deploy/step_function.yaml
       Parameters:
         Env:
           Ref: Env    
