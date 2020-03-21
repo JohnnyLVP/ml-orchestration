@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Templates under onetime templates and per_environment
+Parameters:
+  Env:
+    Type: String
+    Description: 'environment (uppercase only), ex: QAS, PRD'
+    Default: QAS
+  AppEnv:
+    Type: String
+    Description: 'application environment (lowercase only), ex: qas, prd'
+    Default: qas
+  DeployTag:
+    Type: String
+    Description: 'deployment tag (lowercase only) ex: blue, green'
+  Org:
+    Type: String
+    Description: 'organization (lowercase only), ex: sig (sigmoid), belc (belcorp)'
+    Default: belc
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+    Description: Id of VPC where the stack will be deployed
+Resources:
+  MloIamRoleSecurityGroup:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL:
+        Fn::Sub: https://s3.amazonaws.com/${Org}-bigdata-models-dlk-${AppEnv}/ml-orchestration/setup/iam_sg.yaml
+      Parameters:
+        Env:
+          Ref: Env
+        AppEnv:
+          Ref: AppEnv
+        Org:
+          Ref: Org
+        MyVPCId:
+          Ref: VPCId
+  MloDynamoDBStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL:
+        Fn::Sub: https://s3.amazonaws.com/${Org}-bigdata-models-dlk-${AppEnv}/ml-orchestration/setup/dynamodb.yaml
+      Parameters:
+        Env:
+          Ref: Env
+  SnsSqsResources:
+    Type: AWS::Cloudformation::Stack
+    Properties:
+      TemplateURL:
+        Fn::Sub: https://s3.amazonaws.com/${Org}-bigdata-models-dlk-${AppEnv}/ml-orchestration/setup/dynamodb.yaml
+      Parameters:
+        Env: !Ref Env
+        AppEnv: !Ref AppEnv

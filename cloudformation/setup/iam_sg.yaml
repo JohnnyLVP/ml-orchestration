@@ -1,4 +1,3 @@
----
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Template to create roles
 Parameters:
@@ -12,6 +11,9 @@ Parameters:
     Type: String
     Default: belc
     Description: 'organization (lowercase only), ex: belc (belcorp)'
+  MyVpcId:
+    Type: String
+    Description: VPC Id where will be deploy the security group
 Resources:
   LambdaExecutionRoleRes:
     Type: AWS::IAM::Role
@@ -26,7 +28,10 @@ Resources:
             Service:
             - lambda.amazonaws.com
             - states.amazonaws.com
+            - apigateway.amazonaws.com
           Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
       Policies:
       - PolicyName:
           Fn::Sub: MLO-LambdaExec-Policy-${Env}
@@ -46,7 +51,6 @@ Resources:
             - logs:putSubscriptionFilter
             - logs:createExportTask
             - cloudwatch:getMetricData
-            - elasticmapreduce:*
             - events:DescribeRule
             - events:EnableRule
             - events:ListRules
@@ -55,43 +59,28 @@ Resources:
             - events:PutRule
             Resource: "*"
           - Effect: Allow
-            Action: elasticmapreduce:*
-            Resource: "*"
-          - Effect: Allow
             Action:
             - dynamodb:BatchGetItem
             - dynamodb:BatchWriteItem
             - dynamodb:PutItem
             - dynamodb:ListTables
-            - dynamodb:DeleteItem
             - dynamodb:Scan
             - dynamodb:Query
             - dynamodb:DescribeStream
-            - dynamodb:UpdateItem
-            - dynamodb:DescribeTimeToLive
             - dynamodb:ListStreams
-            - dynamodb:DescribeReservedCapacityOfferings
-            - dynamodb:DescribeTable
-            - dynamodb:GetShardIterator
-            - dynamodb:DescribeGlobalTable
-            - dynamodb:DescribeReservedCapacity
             - dynamodb:GetItem
-            - dynamodb:DescribeContinuousBackups
-            - dynamodb:DescribeBackup
             - dynamodb:GetRecords
             Resource:
             - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/DY-MLO-NotifProcessingLog-${Env}
+            - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/DY-MLO-ProcessInfo-${Env}
           - Effect: Allow
             Action:
-            - sqs:ListQueues
             - sqs:ReceiveMessage
-            - sqs:CreateQueue
-            - sqs:ReceiveMessage
-            - sqs:SendMessage
             - sqs:DeleteMessage
             - sqs:GetQueueAttributes
             Resource:
-            - Fn::Sub: arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:SQS-MLO-ProcessQueue-${Env}-*
+            - Fn::Sub: arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:SQS-MLO-ProcessQueue-${Env}
+            - Fn::Sub: arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:SQS-MLO-UpdateQueue-${Env}
           - Effect: Allow
             Action:
             - s3:GetObject
@@ -102,16 +91,30 @@ Resources:
           - Effect: Allow
             Action: states:*
             Resource:
-              Fn::Sub: arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:SF-MLO-${Env}-*
+              Fn::Sub: arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:SF-MLO-${Env}
           - Effect: Allow
             Action:
             - sns:Publish
             - sns:GetTopicAttributes
             - sns:List*
-            - sns:CreateTopic
-            - sns:DeleteTopic
             Resource:
-              Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:SNS-MLO-Topic-${Env}-*
+              Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:SNS-MLO-Topic-${Env}
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:        
+      GroupDescription: Allow Lambda work in VPC
+      GroupName:
+        Fn::Sub: SG-MLO-Lambda-${Env}
+      VpcId:
+        Ref: MyVpcId
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 0
+        ToPort: 0
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: -1
+        CidrIp: 0.0.0.0/0
 Outputs:
   LambdaExecutionRoleRes:
     Value:

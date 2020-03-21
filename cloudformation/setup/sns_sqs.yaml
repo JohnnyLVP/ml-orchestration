@@ -60,6 +60,60 @@ Resources:
             ArnEquals:
               aws:SourceArn:
                 Ref: TopicRes
+  UpdateQueueRes:
+    Type: AWS::SQS::Queue
+    Properties:
+      DelaySeconds: '0'
+      QueueName:
+        Fn::Sub: SQS-MLO-UpdateQueue-${Env}
+      MaximumMessageSize: '262144'
+      MessageRetentionPeriod: '7200'
+      ReceiveMessageWaitTimeSeconds: '0'
+      VisibilityTimeout: '120'
+  UpdateQueueResSubs:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn:
+        Ref: TopicRes
+      Endpoint:
+        Fn::GetAtt:
+        - UpdateQueueRes
+        - Arn
+      Protocol: sqs
+      FilterPolicy:
+        message_type:
+        - updates
+  UpdateQueueResSubsRecommender:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn:
+        Ref: TopicRes
+      Endpoint: jvalenzuelap@belcorp.biz
+      Protocol: email
+      FilterPolicy:
+        algorithm:
+        - Recommender
+  UpdateQueueResPolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+      - Ref: UpdateQueueRes
+      PolicyDocument:
+        Version: '2012-10-17'
+        Id: UpdateQueuePolicyId
+        Statement:
+        - Sid: Sid1
+          Effect: Allow
+          Principal: "*"
+          Action: SQS:SendMessage
+          Resource:
+            Fn::GetAtt:
+            - UpdateQueueRes
+            - Arn
+          Condition:
+            ArnEquals:
+              aws:SourceArn:
+                Ref: TopicRes
 Outputs:
   TopicRes:
     Value:
@@ -74,3 +128,13 @@ Outputs:
           - Arn
         - 'URL:'
         - Ref: ProcessQueueRes
+  UpdateQueueResArn:
+    Value:
+      Fn::Join:
+      - " "
+      - - 'ARN:'
+        - Fn::GetAtt:
+          - UpdateQueueRes
+          - Arn
+        - 'URL:'
+        - Ref: UpdateQueueRes

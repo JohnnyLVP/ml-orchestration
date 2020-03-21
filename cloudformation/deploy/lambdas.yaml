@@ -12,49 +12,15 @@ Parameters:
     Type: String
     Description: S3 bucket for referenced templates
   VPCSubnetIDsA:
-    Type: AWS::EC2::Subnet::Id
+    Type: String
     Description: The list of SubnetIds in your Virtual Private Cloud (VPC)
   VPCSubnetIDsB:
-    Type: AWS::EC2::Subnet::Id
+    Type: String
     Description: The list of SubnetIds in your Virtual Private Cloud (VPC)
   VPCSecurityGroupIDs:
-    Type: AWS::EC2::SecurityGroup::Id
+    Type: String
     Description: The list of SubnetIds in your Virtual Private Cloud (VPC)
 Resources:
-  StateMachineRes:
-    DependsOn:
-      - SubmitRequest
-      - CheckProcessStatus
-      - PostProcessingStep
-    Type: AWS::StepFunctions::StateMachine
-    Properties:
-      StateMachineName:
-        Fn::Sub: SF-MLO-${Env}
-      RoleArn:
-        Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/IAM-MLO-LambdaExec-${Env}
-      DefinitionString: !Sub
-      - Fn::Transform:
-          Name: AWS::Include
-          Parameters:
-            Location: !Sub
-              - s3://${BucketReference}/ml-orchestration/deploy/state_machine_def.json
-              - {BucketReference: !Ref TemplateUploadsBucket}
-      - { 
-          RequestLambda: !Ref SubmitRequest.arn,
-          CheckProcessLambda: !Ref CheckProcessStatus.arn,
-          PostProcessLambda: !Ref PostProcessingStep.arn
-        }
-  RequestLambdaLayer:
-    Type: AWS::Lambda::LayerVersion
-    Properties:
-      CompatibleRuntimes:
-        - Python3.6
-      Content:
-        S3Bucket: 
-          Ref: TemplateUploadsBucket
-        S3Key: ml-orchestration/deploy/requests-lambda-layer.zip
-      Description: Installed libraries for POST request
-      LayerName: requests-layer
   ProcessNotification:
     Type: AWS::Lambda::Function
     Properties:
@@ -102,14 +68,13 @@ Resources:
           APP_ENV:
             Ref: AppEnv
           REGION_NAME:
-            Fn::Sub: "${AWS::Region}"
+            Fn::Sub: ${AWS::Region}
           STATE_MACHINE_ARN:
-            Fn::GetAtt:
-              -StateMachineRes
-              -Arn
+            Fn::Sub: arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:SF-ROD-${Env}
           ARN_SNS_TOPIC:
             Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:SNS-MLO-Topic-${Env}
-          BUCKET_NAME: !Ref TemplateUploadsBucket
+          BUCKET_NAME: 
+            !Ref TemplateUploadsBucket
           PATH_NAME: ml-orchestration/deploy/algorithm_list.json
           MAX_DISTRIBIUTED_EXECUTIONS_ALLOWED: 3
           MAX_SECUENTIAL_EXECUTIONS_ALLOWED: 1            
@@ -201,10 +166,9 @@ Resources:
       - Key: Tipo
         Value: Proyecto
       Handler: submit_request.lambda_handler
-      Layers:
-        Fn::GetAtt:
-        - RequestLambdaLayer
-        - Arn
+      #Layer from AWS in order to use Request library.
+      Layers: 
+        - arn:aws:lambda:us-east-1:668099181075:layer:AWSLambda-Python-AWS-SDK:4
       VpcConfig:
         SecurityGroupIds:
         - Ref: VPCSecurityGroupIDs
@@ -316,11 +280,6 @@ Resources:
         - TriggerProcess
         - Arn
 Outputs:
-  StateMachineRes:
-    Value:
-      Fn::GetAtt:
-      - StateMachineRes
-      - Name
   TriggerProcess:
     Value:
       Fn::GetAtt:

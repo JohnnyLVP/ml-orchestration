@@ -12,11 +12,33 @@ Resources:
       AttributeDefinitions:
       - AttributeName: uuid
         AttributeType: S
+      - AttributeName: timestamp
+        AttributeType: 'N' 
       KeySchema:
       - AttributeName: uuid
         KeyType: HASH
+      - AttributeName: timestamp
+        KeyType: RANGE
       TableName:
         Fn::Sub: DY-MLO-NotifProcessingLog-${Env}
+      ProvisionedThroughput:
+        ReadCapacityUnits: '5'
+        WriteCapacityUnits: '5'
+  InfoTableRes:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+      - AttributeName: uuid
+        AttributeType: S   
+      - AttributeName: timestamp
+        AttributeType: 'N' 
+      KeySchema:
+      - AttributeName: uuid
+        KeyType: HASH
+      - AttributeName: timestamp
+        KeyType: RANGE
+      TableName:
+        Fn::Sub: DY-MLO-ProcessInfo-${Env}
       ProvisionedThroughput:
         ReadCapacityUnits: '5'
         WriteCapacityUnits: '5'
@@ -24,3 +46,7 @@ Outputs:
   RequestsNotifTableRes:
     Value:
       Ref: RequestsNotifTableRes
+  InfoTableRes:
+    Value:
+      Ref: InfoTableRes
+  
