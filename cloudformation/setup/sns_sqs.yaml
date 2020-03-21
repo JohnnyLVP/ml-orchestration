@@ -85,7 +85,7 @@ Resources:
     Properties:
       TopicArn:
         Ref: TopicRes
-      Endpoint: jvalenzuelap@belcorp.biz
+      Endpoint: jvalenzuela@belcorp.biz
       Protocol: email
       FilterPolicy:
         algorithm:

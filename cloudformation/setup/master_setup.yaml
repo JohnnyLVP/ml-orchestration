@@ -43,7 +43,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL:
-        Fn::Sub: https://s3.amazonaws.com/${Org}-bigdata-models-dlk-${AppEnv}/ml-orchestration/setup/dynamodb.yaml
+        Fn::Sub: https://s3.amazonaws.com/${Org}-bigdata-models-dlk-${AppEnv}/ml-orchestration/setup/sns_sqs.yaml
       Parameters:
         Env: 
           Ref: Env
