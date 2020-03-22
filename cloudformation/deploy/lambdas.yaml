@@ -247,7 +247,7 @@ Resources:
         Value: 'NO'
       - Key: Tipo
         Value: Proyecto
-      Handler: check_process_status.lambda_handler
+      Handler: post_processing_notif.lambda_handler
       Role:
         Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/IAM-MLO-LambdaExec-${Env}
       Runtime: python3.6
@@ -256,7 +256,7 @@ Resources:
         S3Bucket:
           Ref: TemplateUploadsBucket
         S3Key: 
-          ml-orchestration/deploy/check_process_status.zip
+          ml-orchestration/deploy/post_processing_notif.zip
   UpdateStatusEventSourceMapping:
     Type: AWS::Lambda::EventSourceMapping
     Properties:
