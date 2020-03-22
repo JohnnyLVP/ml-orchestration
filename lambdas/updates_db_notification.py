@@ -16,6 +16,7 @@ def lambda_handler(event, context):
 
     try:
         message = json.loads(event['Records'][0]['body'])
+        message = json.loads(message['Message'])
         dy_tablename, dy_status = update_dynamo_table(message)
 
         print('Table {db_table} has been updated: {db_status}'.format(
