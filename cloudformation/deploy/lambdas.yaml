@@ -28,8 +28,8 @@ Resources:
         Fn::Sub: Lambda-MLO-ProcessNotification-${Env}
       Environment:
         Variables:
-          APP_ENV:
-            Ref: AppEnv
+          ENV:
+            Ref: Env
           REGION_NAME:
             Fn::Sub: ${AWS::Region}
           TOPIC_ARN:
@@ -269,6 +269,17 @@ Resources:
         - UpdatesNotification
         - Arn
   ProcessStatusEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      BatchSize: 1
+      Enabled: true
+      EventSourceArn:
+        Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:sns-bigdata-cierrecampania-${Env}
+      FunctionName:
+        Fn::GetAtt:
+        - ProcessNotification
+        - Arn
+  NotifProcessEventSourceMapping:
     Type: AWS::Lambda::EventSourceMapping
     Properties:
       BatchSize: 1
