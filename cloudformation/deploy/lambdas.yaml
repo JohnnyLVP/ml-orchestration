@@ -70,7 +70,7 @@ Resources:
           REGION_NAME:
             Fn::Sub: ${AWS::Region}
           STATE_MACHINE_ARN:
-            Fn::Sub: arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:SF-ROD-${Env}
+            Fn::Sub: arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:SF-MLO-${Env}
           ARN_SNS_TOPIC:
             Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:SNS-MLO-Topic-${Env}
           BUCKET_NAME: 
@@ -274,17 +274,6 @@ Resources:
       BatchSize: 1
       Enabled: true
       EventSourceArn:
-        Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:sns-bigdata-cierrecampania-${Env}
-      FunctionName:
-        Fn::GetAtt:
-        - ProcessNotification
-        - Arn
-  NotifProcessEventSourceMapping:
-    Type: AWS::Lambda::EventSourceMapping
-    Properties:
-      BatchSize: 1
-      Enabled: true
-      EventSourceArn:
         Fn::Sub: arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:SQS-MLO-ProcessQueue-${Env}
       FunctionName:
         Fn::GetAtt:
@@ -300,6 +289,17 @@ Resources:
           - ProcessNotification
           - Arn
       Protocol: lambda
+  NotifProcessEventSourceMapping:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Fn::GetAtt:
+        - ProcessNotification
+        - Arn
+      Principal: sns.amazonaws.com
+      Action: lambda:InvokeFunction
+      SourceArn:
+        Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:sns-bigdata-cierrecampania-${Env}
 Outputs:
   TriggerProcess:
     Value:
