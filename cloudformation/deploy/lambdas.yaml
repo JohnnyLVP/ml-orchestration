@@ -225,7 +225,7 @@ Resources:
       Environment:
         Variables:
           PATH_NAME:
-            Fn::Sub: DY-MLO-NotifProcessingLog-${Env}    
+            ml-orchestration/deploy/algorithm_list.json    
           REGION:
             Fn::Sub: ${AWS::Region}
           S3_BUCKET:
