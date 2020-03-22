@@ -113,7 +113,7 @@ def send_updates_info(message):
 
 def get_message_elements(event):
     message = json.loads(event['Records'][0]['body'])
-    message = json.loads(body['Message'])
+    message = json.loads(message['Message'])
 
     execution_order = message[init_process]
     process_type_value = message[process_type]
