@@ -1,6 +1,5 @@
 import json
 import os
-import optparse
 from utils.orchestrator_utils import OrchestratorManager
 from utils.sns import SNSManager
 from constants.db_status_enum import DBStatus

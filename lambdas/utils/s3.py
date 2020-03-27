@@ -7,7 +7,7 @@ class S3Manager:
         self.s3_client = boto3.client("s3")
         self.file_read_response = None
 
-    def does_files_exist(self, s3_file_bucket_map_list=[]):
+    def does_files_exist(self, s3_file_bucket_map_list):
         file_status = True
         for s3_file_bucket_map in s3_file_bucket_map_list:
             file_path = s3_file_bucket_map["s3_file_path"]

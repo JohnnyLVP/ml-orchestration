@@ -5,8 +5,8 @@
             [
                 {
                     "algorithm": "Recommender",
-                    "endpoint":"https://leo3hmu4fc.execute-api.us-east-1.amazonaws.com/dev/api/train-all",
-                    "avg_wait_time": 300,
+                    "endpoint":"https://1bdb9ol8t8.execute-api.us-east-1.amazonaws.com/dev/api/train-all",
+                    "avg_wait_time": 500,
                     "payload": {"epoch":"1557151604"}
                 },
                 {
@@ -21,7 +21,7 @@
                 {
                     "algorithm":"DeoModel",
                     "endpoint":"https://reqres.in/api/train-all",
-                    "avg_wait_time": 300,
+                    "avg_wait_time": 500,
                     "payload": {"seed":10}
                 },
                 {

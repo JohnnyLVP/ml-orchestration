@@ -2,7 +2,6 @@ import json
 import os
 from utils.orchestrator_utils import OrchestratorManager
 from utils.dynamo_db import DBManager
-from constants.db_tables_enum import DBTables
 from constants.regular_constants import *
 
 '''

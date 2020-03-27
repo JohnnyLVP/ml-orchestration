@@ -9,7 +9,7 @@ class SNSManager:
     def __init__(self, region_name):
         self.sns_client = boto3.client('sns', region_name)
         
-    def publish_message(self, message_hash, topic_arn, options_hash=dict()):
+    def publish_message(self, message_hash, topic_arn):
         """
         this method publishes messages to SNS
         :param message_hash: actual message
@@ -39,7 +39,7 @@ class SNSManager:
             status_code = response['ResponseMetadata']['HTTPStatusCode']
         except botocore.exceptions.ClientError as e:
             print("Failed while publishing the data to SNS topic: "+ str(e))
-       	    status_code = int(e.response['ResponseMetadata']['HTTPStatusCode'])
+            status_code = int(e.response['ResponseMetadata']['HTTPStatusCode'])
 
         return status_code 
         

@@ -2,7 +2,7 @@ import json
 import os
 #botocore is executing from the AWS lambda layer
 from botocore.vendored import requests
-from constants.regular_constants import mlo_uuid, request_ok_status,request_created_status, none_failure_reason, request_status, process_status, uuid, process_info, status, country, campaign, info, algortihm_payload, endpoint, stage, created_at, failure_reason
+from constants.regular_constants import mlo_uuid, request_ok_status,request_created_status, none_failure_reason, request_status, uuid, process_info, status, country, campaign, info, algortihm_payload, endpoint, stage, created_at, failure_reason
 from utils.orchestrator_utils import OrchestratorManager
 from constants.process_stages_enum import PipelineStages
 from constants.db_status_enum import DBStatus
